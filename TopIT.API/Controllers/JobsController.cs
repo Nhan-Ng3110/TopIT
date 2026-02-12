@@ -36,6 +36,10 @@ namespace TopIT.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Job job)
         {
+            if(job.SalaryMax < job.SalaryMin)
+            {
+                return BadRequest("Lương tối đa phải lớn hơn hoặc bằng lương tối thiểu");
+            }    
             await _jobRepo.AddAsync(job);
             return CreatedAtAction(nameof(GetById), new { id = job.Id }, job);
         }

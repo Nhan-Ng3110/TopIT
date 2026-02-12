@@ -27,22 +27,20 @@ Hệ thống áp dụng mô hình **Client–Server** kết hợp với tư duy 
 - Dễ mở rộng (Scalability)
 - Phân tách rõ trách nhiệm từng tầng
 
-```mermaid
 graph TD
-    Client[ Client Side (Angular SPA)] -->|HTTP/REST API| Gateway[ ASP.NET Core Web API]
+Client[Client Side Angular SPA] -->|HTTP REST API| Gateway[ASP.NET Core Web API]
 
-    subgraph "Backend (.NET Core Ecosystem)"
+    subgraph Backend_DotNet_Core
         Gateway --> Controller[Controllers]
         Controller --> Service[Business Logic Layer]
         Service --> Repo[Repository Pattern]
     end
 
-    Repo -->|Entity Framework Core| DB[( SQL Server)]
+    Repo -->|Entity Framework Core| DB[(SQL Server)]
 
-    subgraph "Future AI Integration"
-        Service <-->|REST API| PyService[ Python AI Service]
+    subgraph Future_AI_Integration
+        Service <-->|REST API| PyService[Python AI Service]
     end
-```
 
 ### 🔍 Technical Breakdown
 

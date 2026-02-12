@@ -11,15 +11,20 @@ namespace TopIT.Core.Entities
     {
         public int Id { get; set; }
 
-        [Required]
-        [MaxLength(200)]
+        [Required(ErrorMessage ="Tiêu đề không được để trống!")]
+        [MaxLength(200, ErrorMessage ="Không được quá 200 ký tự")]
         public string Title { get; set; } = string.Empty; // Tên công việc
+                                                          
+        [Required]                                                  
         public string? Description { get; set; } //  tả công việc
         //---- Các trường để lọc
         // Theo vị trí
         public string Location { get; set; } = "Hồ Chí Minh";// Vị trí làm việc        
         //Theo mức lương
+        [Range(0,double.MaxValue, ErrorMessage = "Lương không được là số âm!")]
         public decimal? SalaryMax { get; set; }// Lương tối đa
+
+        [Range(0, double.MaxValue, ErrorMessage = "Lương không được là số âm!")]
         public decimal? SalaryMin { get; set; }// Lương tối thiểu
         public bool? IsNegotiable { get; set; }// Lương thỏa thuận
 
