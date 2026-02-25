@@ -16,6 +16,12 @@ namespace TopIT.API.Controllers
         {
             _jobRepo = jobRepo;
         }
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        { 
+            var jobs = await _jobRepo.GetAllAsync(); 
+            return Ok(jobs);
+        }
 
         [HttpGet("search")]
         public async Task<IActionResult> Search([FromQuery] string? keyWord, [FromQuery] string? Location)

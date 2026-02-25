@@ -13,6 +13,8 @@ namespace TopIT.Core.Interfaces
         Task<Job?> GetByIDAsync(int id);
         Task AddAsync(Job job);
 
+        Task<IEnumerable<Job>> GetAllAsync();
+
 
     }
 }

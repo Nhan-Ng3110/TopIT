@@ -42,6 +42,11 @@ namespace TopIT.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task<IEnumerable<Job>> GetAllAsync()
+        {
+            return await _context.Jobs.ToListAsync();
+        }
+
 
     }
 }
