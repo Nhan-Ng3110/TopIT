@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using TopIT.Core.DTOs;
 using TopIT.Core.Entities;
 using TopIT.Core.Interfaces;
 using TopIT.Infrastructure.Data;
@@ -16,19 +17,43 @@ namespace TopIT.Infrastructure.Repositories
         private readonly AppDbContext _context;
         public JobRepository(AppDbContext context) { _context = context; }
 
-        public async Task<IEnumerable<Job>> SearchJobAsync(string? keyWord, string? location)
+        public async Task<IEnumerable<Job>> SearchJobAsync(JobSearchDto searchDto)
         {
-            IQueryable<Job> query = _context.Jobs.Include(j => j.Company);
-            if (!string.IsNullOrWhiteSpace(keyWord))
+            IQueryable<Job> query = _context.Jobs
+                .Include(j => j.Company)
+                .AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(searchDto.KeyWord))
             {
-                query = query.Where(j => j.Title.Contains(keyWord) || j.Description != null && j.Description.Contains(keyWord));
+                query = query.Where(j => j.Title.Contains(searchDto.KeyWord) || (j.Description != null && j.Description.Contains(searchDto.KeyWord)));
             }
 
-            if (!string.IsNullOrWhiteSpace(location))
+            if (!string.IsNullOrWhiteSpace(searchDto.Location))
             {
-                query = query.Where(j => j.Location.Contains(location));
+                query = query.Where(j => j.Location.Contains(searchDto.Location));
             }
 
+            
+            if (searchDto.SalaryMin.HasValue) query = query.Where(j => j.SalaryMax >= searchDto.SalaryMin.Value);
+            if (searchDto.SalaryMax.HasValue) query = query.Where(j => j.SalaryMin <= searchDto.SalaryMax.Value);
+
+            if (!string.IsNullOrWhiteSpace(searchDto.Level))
+            {
+                query = query.Where(j => j.Level.Contains(searchDto.Level));
+            }
+
+            if (searchDto.ExperienceYears.HasValue)
+            {
+                
+                query = query.Where(j => j.ExperienceYears <= searchDto.ExperienceYears.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(searchDto.JobStyle))
+            {
+                query = query.Where(j => j.JobType.Contains(searchDto.JobStyle));
+            }
+
+      
             return await query.OrderByDescending(j => j.CreatedAt).ToListAsync();
         }
 

@@ -1,0 +1,577 @@
+@import "../../../styles.scss";
+
+.job-list-page {
+  padding-bottom: 50px;
+}
+
+
+.job-container {
+  max-width: 1000px; 
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+// --- MODERN SEARCH BAR ---
+.search-command-bar {
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 8px;
+  margin: 40px auto;
+  z-index: 10;
+
+  .search-group {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    input {
+      background: transparent;
+      border: none;
+      color: white;
+      padding: 10px;
+      width: 100%;
+      outline: none;
+    }
+  }
+
+  .btn-execute {
+    background: white;
+    color: black;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 14px;
+    font-weight: 700;
+    transition: 0.3s;
+    &:hover { background: #00d2ff; color: white; }
+  }
+}
+
+// --- GLASS CARD ---
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 25px;
+  margin-bottom: 20px;
+  transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    border-color: rgba(0, 210, 255, 0.4);
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-5px); // Bay lên nhẹ nhìn sẽ xịn hơn
+  }
+
+  .company-logo {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(45deg, #00d2ff, #9d50bb);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+}
+
+.tech-tag {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  margin-right: 8px;
+  &.salary { color: #00d2ff; }
+}
+
+.btn-apply-now {
+  background: transparent;
+  border: 1px solid #00d2ff;
+  color: #00d2ff;
+  padding: 8px 25px;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: 0.3s;
+  &:hover { background: #00d2ff; color: black; }
+}
+
+// Animation nhấp nháy cho Verified
+.pulse { animation: pulse-animation 2s infinite; }
+@keyframes pulse-animation {
+  0% { box-shadow: 0 0 0 0px rgba(76, 209, 55, 0.4); }
+  100% { box-shadow: 0 0 0 10px rgba(76, 209, 55, 0); }
+}
+
+// CSS Chia 2 cột (Master - Detail)
+.master-detail-grid {
+  display: grid;
+  grid-template-columns: 4fr 8fr; // Tỷ lệ cột 4/8 (Giống ITviec)
+  gap: 30px;
+  align-items: start;
+}
+
+// Cột trái: Có thanh cuộn dọc
+.job-list-col {
+  height: 80vh; // Chiều cao cố định
+  overflow-y: auto;
+  padding-right: 15px;
+  
+  // Custom Scrollbar mỏng, đẹp
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+  &::-webkit-scrollbar-thumb:hover { background: rgba(0, 210, 255, 0.5); }
+}
+
+// Cột phải: Cố định khi cuộn (Sticky)
+.job-detail-col {
+  position: sticky;
+  top: 20px; 
+  height: 80vh;
+}
+
+// Tùy chỉnh Card rút gọn bên trái
+.glass-card.compact {
+  cursor: pointer;
+  padding: 20px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  // Viền sáng lên khi Card được click (Active)
+  &.active-card {
+    border: 1px solid #00d2ff;
+    background: rgba(0, 210, 255, 0.05);
+    box-shadow: inset 4px 0 0 #00d2ff; // Đường viền xanh bên trái
+  }
+}
+
+// Chỉnh lại kích thước Logo cho phù hợp 2 cột
+.company-logo.small { width: 45px; height: 45px; font-size: 1.2rem; }
+.company-logo.large { width: 80px; height: 80px; font-size: 2.5rem; border-radius: 20px; }
+
+.cursor-pointer { cursor: pointer; }
+
+/* --- FILTER BAR --- */
+.filter-bar-glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-select {
+  background-color: transparent;
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  cursor: pointer;
+  
+  &:focus {
+    background-color: transparent;
+    border-color: #00d2ff;
+    box-shadow: 0 0 0 0.25rem rgba(0, 210, 255, 0.25);
+    color: white;
+  }
+  
+  option {
+    background-color: #111; /* Nền tối cho dropdown */
+    color: white;
+  }
+}
+
+.btn-filter-main {
+  background: transparent;
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px 20px;
+  border-radius: 20px;
+  transition: 0.3s;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #e2e8f0;
+  }
+}
+
+/* --- OFFCANVAS SIDEBAR (Menu trượt) --- */
+.glass-offcanvas {
+  background: rgba(10, 10, 12, 0.95) !important;
+  backdrop-filter: blur(25px);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  width: 400px !important;
+}
+
+/* Filter Pills (Nút chọn Level/Model) */
+.filter-pill {
+  background: transparent;
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 6px 16px;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  
+  i { transition: 0.3s; }
+
+  &:hover {
+    border-color: #00d2ff;
+    color: #00d2ff;
+  }
+
+  &.active-pill {
+    background: rgba(0, 210, 255, 0.1);
+    border-color: #00d2ff;
+    color: #00d2ff;
+    
+    i::before {
+      content: "\f272"; /* Đổi icon plus thành check/dash tùy ý, F272 là dấu check trong Bootstrap icon */
+    }
+  }
+}
+
+/* Range Slider Custom */
+.custom-range {
+  &::-webkit-slider-thumb {
+    background: #00d2ff;
+  }
+  &::-webkit-slider-runnable-track {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* Custom Checkbox */
+.glass-search-box {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  input:focus { outline: none; }
+}
+
+.custom-checkbox .form-check-input {
+  background-color: transparent;
+  border-color: rgba(255,255,255,0.3);
+  
+  &:checked {
+    background-color: #7c3aed;
+    border-color: #7c3aed;
+  }
+}
+
+/* --- CUSTOM DROPDOWN CHECKBOX --- */
+.dropdown-menu-glass {
+  position: absolute;
+  top: 120%; 
+  left: 0;
+  z-index: 9999 !important;
+  min-width: 200px;
+  background: rgba(15, 15, 20, 0.95);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  
+
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  
+  &.show {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Định dạng lại nút để nhìn giống thẻ Select
+.glass-select {
+  background: transparent;
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 8px 20px;
+  
+  &:hover {
+    border-color: #00d2ff;
+    color: white;
+  }
+}
+
+/* Đảm bảo Backdrop của Offcanvas luôn nằm trên cùng */
+.offcanvas-backdrop {
+  z-index: 1040;
+}
+.glass-offcanvas {
+  z-index: 1045;
+}
+
+/* --- FILTER BAR & CUSTOM DROPDOWN --- */
+.filter-bar-glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 1010; /* Đảm bảo cả thanh filter nằm trên vùng danh sách job */
+  overflow: visible !important; /* Cho phép dropdown hiển thị tràn ra ngoài */
+}
+
+.glass-select {
+  background: transparent;
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 8px 20px;
+  
+  &:hover {
+    border-color: #00d2ff;
+    color: white;
+  }
+}
+
+.dropdown-menu-glass {
+  position: absolute;
+  top: 120%; 
+  left: 0;
+  z-index: 1000;
+  min-width: 200px;
+  background: rgba(15, 15, 20, 0.95);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  
+  /* Hidden by default */
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  
+  &.show {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.btn-filter-main {
+  background: transparent;
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px 20px;
+  border-radius: 20px;
+  transition: 0.3s;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #e2e8f0;
+  }
+}
+
+/* --- MASTER-DETAIL GRID --- */
+.master-detail-grid {
+  display: grid;
+  grid-template-columns: 4fr 8fr; 
+  gap: 30px;
+  align-items: start;
+}
+
+.job-list-col {
+  height: 80vh; 
+  overflow-y: auto;
+  padding-right: 15px;
+  
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+  &::-webkit-scrollbar-thumb:hover { background: rgba(0, 210, 255, 0.5); }
+}
+
+.job-detail-col {
+  position: sticky;
+  top: 20px; 
+  height: 80vh;
+}
+
+.glass-card.compact {
+  cursor: pointer;
+  padding: 20px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  &.active-card {
+    border: 1px solid #00d2ff;
+    background: rgba(0, 210, 255, 0.05);
+    box-shadow: inset 4px 0 0 #00d2ff; 
+  }
+}
+
+.company-logo.small { width: 45px; height: 45px; font-size: 1.2rem; }
+.company-logo.large { width: 80px; height: 80px; font-size: 2.5rem; border-radius: 20px; }
+
+/* --- OFFCANVAS SIDEBAR --- */
+.glass-offcanvas {
+  background: rgba(10, 10, 12, 0.95) !important;
+  backdrop-filter: blur(25px);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  width: 400px !important;
+  z-index: 1045;
+}
+
+.offcanvas-backdrop {
+  z-index: 1040;
+}
+
+.filter-pill {
+  background: transparent;
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 6px 16px;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  
+  i { transition: 0.3s; }
+
+  &:hover {
+    border-color: #00d2ff;
+    color: #00d2ff;
+  }
+
+  &.active-pill {
+    background: rgba(0, 210, 255, 0.1);
+    border-color: #00d2ff;
+    color: #00d2ff;
+    
+    i::before {
+      content: "\f272"; 
+    }
+  }
+}
+
+.custom-range {
+  &::-webkit-slider-thumb {
+    background: #00d2ff;
+  }
+  &::-webkit-slider-runnable-track {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+.glass-search-box {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  input:focus { outline: none; }
+}
+
+.custom-checkbox .form-check-input {
+  background-color: transparent;
+  border-color: rgba(255,255,255,0.3);
+  
+  &:checked {
+    background-color: #7c3aed;
+    border-color: #7c3aed;
+  }
+}
+
+.cursor-pointer { cursor: pointer; }
+
+/* --- THANH TÌM KIẾM PRO (TopIT Style) --- */
+.glass-search-wrapper {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 100px; // Bo tròn hai đầu
+  padding: 5px;
+  max-width: 900px;
+  width: 100%;
+  
+  &:focus-within {
+    border-color: rgba(0, 210, 255, 0.5);
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.15);
+  }
+}
+
+.search-block {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  height: 50px;
+  
+  i {
+    font-size: 1.2rem;
+    margin-right: 12px;
+  }
+  
+  input, select {
+    background: transparent;
+    border: none;
+    color: white;
+    width: 100%;
+    outline: none;
+    font-size: 1.05rem;
+    
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+  }
+  
+  select {
+    cursor: pointer;
+    option { background: #1a1a2e; color: white; }
+  }
+}
+
+.keyword-block {
+  flex: 5; // Chiếm nhiều không gian nhất
+}
+
+.location-block {
+  flex: 3;
+}
+
+.divider {
+  width: 1px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-search-primary {
+  background: linear-gradient(45deg, #00d2ff, #7c3aed);
+  color: white;
+  border: none;
+  border-radius: 50px; // Bo tròn nút
+  height: 50px;
+  padding: 0 35px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: 0.3s;
+  
+  &:hover {
+    transform: scale(1.02);
+    box-shadow: 0 5px 15px rgba(124, 58, 237, 0.4);
+  }
+}
+
+/* Responsive cho Mobile */
+@media (max-width: 768px) {
+  .glass-search-wrapper {
+    flex-direction: column;
+    border-radius: 20px;
+    padding: 15px;
+    gap: 10px;
+  }
+  
+  .search-block { padding: 0 10px; width: 100%; }
+  .divider { display: none; }
+  .btn-search-primary { width: 100%; border-radius: 12px; }
+}

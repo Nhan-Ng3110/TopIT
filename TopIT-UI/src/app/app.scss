@@ -1,16 +1,172 @@
-.job-card {
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    padding: 20px;
-    margin-bottom: 15px;
-    border-left: 5px solid #007bff;
-    transition: transform 0.2s;
+// === VARIABLES ===
+$bg-dark: #050505;
+$bg-darker: #020202;
+$glass-bg: rgba(13, 17, 23, 0.65);         // nền mờ kính
+$glass-border: rgba(255, 255, 255, 0.08);
+$accent-cyan: #00d2ff;
+$accent-purple: #9d50bb;
+$gradient-primary: linear-gradient(90deg, $accent-cyan, $accent-purple);
+$text-primary: #e2e8f0;
+$text-secondary: #94a3b8;
 
-    &:hover {
-        transform: translateY(-5px);
+// === HEADER ===
+.navbar-modern {
+  background: $glass-bg;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px); // cho Safari
+  border-bottom: 1px solid $glass-border;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: background 0.3s ease;
+
+  // Logo
+  .brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+
+    .logo-img {
+      height: 100px;               
+      transition: transform 0.4s ease;
     }
 
-    h3 { color: #007bff; margin-top: 0; }
-    p { margin: 5px 0; color: #555; }
+    .logo-text {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: $gradient-primary;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    &:hover {
+      .logo-img {
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 12px rgba(0, 210, 255, 0.6));
+      }
+    }
+  }
+
+  // Nav menu desktop
+  .nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+
+    .nav-link {
+      color: $text-secondary;
+      font-weight: 500;
+      font-size: 1rem;
+      position: relative;
+      padding: 8px 0;
+      transition: color 0.3s ease;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: $gradient-primary;
+        transition: width 0.4s ease;
+        transform: translateX(-50%);
+      }
+
+      &:hover,
+      &.active {
+        color: $text-primary;
+        &::after {
+          width: 80%;
+        }
+      }
+    }
+  }
+
+  // Button Đăng tuyển
+  .btn-post-job {
+    background: $gradient-primary;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 24px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: 0 6px 20px rgba(157, 80, 187, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(157, 80, 187, 0.5);
+      filter: brightness(1.08);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  // Hamburger (mobile)
+  .hamburger {
+    font-size: 2rem;
+    color: $text-primary;
+    background: transparent;
+    border: none;
+    transition: transform 0.3s;
+    &:focus { outline: none; }
+    &:hover { transform: rotate(90deg); }
+  }
+}
+
+// Mobile menu
+.mobile-menu {
+  background: rgba(5, 5, 5, 0.95);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid $glass-border;
+
+  .nav-link {
+    color: $text-secondary;
+    font-size: 1.25rem;
+    padding: 12px 0;
+    display: block;
+    text-align: center;
+    transition: color 0.3s;
+
+    &:hover, &.active {
+      color: $text-primary;
+    }
+  }
+
+  .btn-post-job {
+    width: 100%;
+    padding: 14px;
+    font-size: 1.1rem;
+  }
+}
+
+// === FOOTER ===
+.main-footer {
+  background: $bg-darker;
+  border-top: 1px solid $glass-border;
+  color: $text-secondary;
+  padding: 40px 0 30px;
+
+  a {
+    color: $text-secondary;
+    text-decoration: none;
+    transition: color 0.3s;
+    &:hover { color: $text-primary; }
+  }
+
+  .small {
+    font-size: 0.9rem;
+  }
+}
+
+// === ANIMATION ===
+@keyframes logo-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.95; }
+  50%      { transform: scale(1.06); opacity: 1; }
 }

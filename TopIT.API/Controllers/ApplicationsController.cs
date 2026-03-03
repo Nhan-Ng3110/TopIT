@@ -17,28 +17,24 @@ namespace TopIT.API.Controllers
             _AppRepo = appRepo;
             _env = env;
         }
+
         [HttpPost("apply")]
         public async Task<IActionResult> Apply([FromForm] int jobId, [FromForm] int userId, [FromForm] string? message, IFormFile cvFile)
         {
-            // 1. Kiểm tra xem có file chưa
             if (cvFile == null || cvFile.Length == 0)
                 return BadRequest("Vui lòng tải lên CV của bạn!");
 
-            // 2. Tạo thư mục lưu trữ CV (ví dụ: wwwroot/uploads/cvs)
             string uploadsFolder = Path.Combine(_env.ContentRootPath, "uploads", "cvs");
             if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
 
-            // 3. Tạo tên file duy nhất để không bị trùng (Ví dụ: user1_job5_filename.pdf)
             string uniqueFileName = $"{userId}_{jobId}_{Guid.NewGuid()}_{cvFile.FileName}";
             string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-            // 4. Thực sự lưu file vào ổ đĩa
             using (var fileStream = new FileStream(filePath, FileMode.Create))
             {
                 await cvFile.CopyToAsync(fileStream);
             }
 
-            // 5. Lưu thông tin vào Database
             var newApp = new JobApplication
             {
                 JobId = jobId,
@@ -66,26 +62,24 @@ namespace TopIT.API.Controllers
         [HttpGet("job/{jobId}")]
         public async Task<IActionResult> GetApplicationsByJob(int jobId)
         {
-            // 1. Gọi Repository để lấy danh sách ứng tuyển kèm thông tin User (Ứng viên)
+
             var applications = await _AppRepo.GetByJobIdAsync(jobId);
 
-            // 2. Kiểm tra nếu không có ai nộp
             if (applications == null || !applications.Any())
             {
                 return NotFound($"Chưa có ứng viên nào nộp đơn cho công việc có ID {jobId}");
             }
 
-            // 3. Tạo link URL hoàn chỉnh cho mỗi cái CV để nhà tuyển dụng bấm vào là xem được luôn
             var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
 
             var result = applications.Select(a => new {
                 a.Id,
                 a.JobId,
-                CandidateName = a.User?.FullName, // Lấy tên từ bảng User nhờ có .Include
+                CandidateName = a.User?.FullName, 
                 a.Message,
                 a.Status,
                 a.AppliedAt,
-                CvUrl = $"{baseUrl}/uploads/cvs/{a.CVPath}" // Link "xịn" để xem CV
+                CvUrl = $"{baseUrl}/uploads/cvs/{a.CVPath}" 
             });
 
             return Ok(result);

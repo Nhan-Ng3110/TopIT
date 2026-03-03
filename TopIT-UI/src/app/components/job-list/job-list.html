@@ -1,0 +1,287 @@
+<div class="job-list-page">
+
+  <section class="hero-section">
+
+    <div class="blob-1"></div>
+
+    <div class="blob-2"></div>
+
+
+
+    <div class="container py-5 py-md-6">
+
+      <div class="header-content text-center mb-5 mb-md-6">
+
+        <h1 class="hero-title display-4 display-md-3 fw-bold">
+
+          LÀM CHỦ <span class="text-gradient">SỰ NGHIỆP</span>
+
+        </h1>
+
+        <p class="hero-subtitle lead text-secondary">Nơi kết nối các Software Engineer với những dự án đột phá.</p>
+
+      </div>
+
+
+
+      <div class="modern-search-bar mx-auto mt-4">
+
+ 
+
+  <div class="glass-search-wrapper mx-auto mt-4 shadow-lg">
+
+    <div class="search-block keyword-block">
+
+      <i class="bi bi-search text-info"></i>
+
+      <input type="text" placeholder="Tìm kiếm kỹ năng, công việc, công ty..." [(ngModel)]="searchFilter.keyWord">
+
+    </div>
+
+   
+
+    <div class="divider"></div>
+
+   
+
+    <div class="search-block location-block">
+
+      <i class="bi bi-geo-alt text-info"></i>
+
+      <select [(ngModel)]="searchFilter.location">
+
+        <option value="">Tất cả địa điểm</option>
+
+        <option value="Ho Chi Minh">Hồ Chí Minh</option>
+
+        <option value="Ha Noi">Hà Nội</option>
+
+        <option value="Da Nang">Đà Nẵng</option>
+
+      </select>
+
+    </div>
+
+   
+
+    <button class="btn-search-primary" (click)="onSearch()">Tìm kiếm</button>
+
+  </div>
+
+
+
+        </div>
+
+      </div>
+
+  </section>
+
+  <section class="results-section py-5">
+    <div class="container">
+      
+      <div class="filter-bar-glass d-flex align-items-center justify-content-between mb-4 p-3 rounded-4">
+        <div class="quick-filters d-flex gap-3 flex-wrap flex-grow-1">
+          
+          <div class="custom-dropdown position-relative">
+            <button class="btn glass-select d-flex justify-content-between align-items-center gap-2" 
+                    (click)="toggleDropdown('level')">
+              Cấp bậc 
+              @if (sidebarLevels.length > 0) {
+                <span class="badge bg-primary rounded-circle">{{ sidebarLevels.length }}</span>
+              }
+              <i class="bi bi-chevron-down ms-2 small"></i>
+            </button>
+            
+            <div class="dropdown-menu-glass p-3" [class.show]="isLevelDropdownOpen">
+              @for (lvl of ['Fresher', 'Junior', 'Middle', 'Senior', 'Manager']; track lvl) {
+                <div class="form-check custom-checkbox mb-2">
+                  <input class="form-check-input" type="checkbox" [id]="'dd-lvl-' + lvl" 
+                         [checked]="isPillSelected('level', lvl)"
+                         (change)="togglePill('level', lvl)">
+                  <label class="form-check-label text-white cursor-pointer" [for]="'dd-lvl-' + lvl">{{ lvl }}</label>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="custom-dropdown position-relative">
+            <button class="btn glass-select d-flex justify-content-between align-items-center gap-2" 
+                    (click)="toggleDropdown('model')">
+              Hình thức làm việc
+              @if (sidebarModels.length > 0) {
+                <span class="badge bg-primary rounded-circle">{{ sidebarModels.length }}</span>
+              }
+              <i class="bi bi-chevron-down ms-2 small"></i>
+            </button>
+            
+            <div class="dropdown-menu-glass p-3" [class.show]="isModelDropdownOpen">
+              @for (model of ['Tại văn phòng', 'Từ xa', 'Linh hoạt']; track model) {
+                <div class="form-check custom-checkbox mb-2">
+                  <input class="form-check-input" type="checkbox" [id]="'dd-mod-' + model" 
+                         [checked]="isPillSelected('model', model)"
+                         (change)="togglePill('model', model)">
+                  <label class="form-check-label text-white cursor-pointer" [for]="'dd-mod-' + model">{{ model }}</label>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+        
+        <button class="btn-filter-main ms-3" (click)="toggleFilterMenu()">
+          <i class="bi bi-funnel"></i> Lọc nâng cao
+        </button>
+      </div>
+
+      <h3 class="mb-4 text-white fw-bold">
+        Việc làm <span class="text-gradient">Mới nhất</span>
+      </h3>
+
+      <div class="master-detail-grid">
+        
+        <div class="job-list-col">
+          @for (job of jobs(); track job.id) {
+            <div class="glass-card compact mb-3" 
+                 [class.active-card]="selectedJob()?.id === job.id"
+                 (click)="onSelectJob(job)">
+              
+              <div class="d-flex align-items-start gap-3">
+                <div class="company-logo small">
+                  {{ job.company?.name?.charAt(0) || 'T' }}
+                </div>
+                <div class="flex-grow-1">
+                  <h4 class="job-name text-white mb-1 fs-5">{{ job.title }}</h4>
+                  <span class="company-name text-secondary small">{{ job.company?.name }}</span>
+                  
+                  <div class="tag-cloud mt-2 d-flex flex-wrap gap-2">
+                    <span class="tech-tag small">{{ job.location }}</span>
+                    @if (job.salaryMin > 0) {
+                      <span class="tech-tag salary small">~{{ job.salaryMin | number }} VNĐ</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <div class="empty-state text-center py-5">
+              <i class="bi bi-cpu text-muted mb-3 display-1"></i>
+              <p class="lead">Hệ thống không tìm thấy công việc phù hợp.</p>
+            </div>
+          }
+        </div>
+
+        <div class="job-detail-col">
+          @if (selectedJob(); as detail) {
+            <div class="glass-card detail-view h-100">
+              
+              <div class="d-flex align-items-start gap-4 mb-4 border-bottom border-secondary pb-4">
+                <div class="company-logo large">
+                  {{ detail.company?.name?.charAt(0) || 'T' }}
+                </div>
+                <div>
+                  <h2 class="text-white fw-bold mb-2">{{ detail.title }}</h2>
+                  <p class="fs-5 text-secondary mb-3">{{ detail.company?.name }}</p>
+                  
+                  <div class="d-flex gap-3 text-secondary mb-3">
+                    <span><i class="bi bi-geo-alt-fill me-1"></i> {{ detail.location }}</span>
+                    <span><i class="bi bi-briefcase-fill me-1"></i> {{ detail.experienceYears ? detail.experienceYears + ' năm' : 'Fresher' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <button class="btn-gradient w-100 py-3 fw-bold fs-5 mb-4 rounded-3" (click)="apply(detail.id)">
+                Ứng tuyển ngay
+              </button>
+
+              <div class="job-description text-secondary">
+                <h5 class="text-white mb-3">Mô tả công việc</h5>
+                <p style="white-space: pre-line; line-height: 1.8;">{{ detail.description }}</p>
+
+                <h5 class="text-white mt-5 mb-3">Phúc lợi dành cho bạn</h5>
+                <ul class="lh-lg">
+                  <li>Môi trường làm việc năng động, thiết bị cấp Mac/Dell xịn.</li>
+                  <li>Review lương 2 lần/năm, thưởng tháng 13.</li>
+                  <li>Bảo hiểm sức khỏe cao cấp (Bảo Việt/PTI).</li>
+                </ul>
+              </div>
+
+              <div class="upload-zone mt-5 pt-4 border-top border-secondary text-center">
+                <input type="file" id="file-detail" (change)="onFileSelected($event)" hidden>
+                <label for="file-detail" class="btn-upload d-inline-flex align-items-center gap-2 text-info cursor-pointer">
+                  <i class="bi bi-paperclip fs-4"></i>
+                  <span>{{ selectedFile ? 'Đã đính kèm CV' : 'Đính kèm CV của bạn (PDF)' }}</span>
+                </label>
+              </div>
+            </div>
+          } @else {
+            <div class="glass-card h-100 d-flex flex-column justify-content-center align-items-center text-secondary py-5">
+              <i class="bi bi-hand-index-thumb display-1 mb-3 text-muted"></i>
+              <h4 class="text-muted">Chọn một công việc để xem chi tiết</h4>
+            </div>
+          }
+        </div>
+
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="offcanvas offcanvas-end glass-offcanvas" tabindex="-1" 
+     [class.show]="isOffcanvasOpen" 
+     [style.visibility]="isOffcanvasOpen ? 'visible' : 'hidden'">
+  
+  <div class="offcanvas-header border-bottom border-secondary">
+    <h4 class="offcanvas-title text-white fw-bold">Bộ Lọc Nâng Cao</h4>
+    <button type="button" class="btn-close btn-close-white" (click)="toggleFilterMenu()"></button>
+  </div>
+  
+  <div class="offcanvas-body">
+    <div class="filter-section mb-4">
+      <label class="text-white fw-bold mb-3 d-block">Cấp bậc</label>
+      <div class="d-flex flex-wrap gap-2">
+        @for (lvl of ['Fresher', 'Junior', 'Middle', 'Senior', 'Manager']; track lvl) {
+          <button class="filter-pill" 
+                  [class.active-pill]="isPillSelected('level', lvl)"
+                  (click)="togglePill('level', lvl)">
+            {{ lvl }} 
+            <i class="bi" [class.bi-plus]="!isPillSelected('level', lvl)" [class.bi-check2]="isPillSelected('level', lvl)"></i>
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="filter-section mb-4">
+      <label class="text-white fw-bold mb-3 d-block">Hình thức làm việc</label>
+      <div class="d-flex flex-wrap gap-2">
+        @for (model of ['Tại văn phòng', 'Từ xa', 'Linh hoạt']; track model) {
+          <button class="filter-pill" 
+                  [class.active-pill]="isPillSelected('model', model)"
+                  (click)="togglePill('model', model)">
+            {{ model }} 
+            <i class="bi" [class.bi-plus]="!isPillSelected('model', model)" [class.bi-check2]="isPillSelected('model', model)"></i>
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="filter-section mb-4">
+      <label class="text-white fw-bold mb-3 d-block">
+        Mức lương: 
+        <span class="text-info">{{ selectedSalary > 0 ? (selectedSalary | number) + ' VNĐ' : 'Tất cả' }}</span>
+      </label>
+      <input type="range" class="form-range custom-range" min="0" max="100000000" step="5000000" [(ngModel)]="selectedSalary">
+      <div class="d-flex justify-content-between text-secondary mt-2 small">
+        <span>0đ</span>
+        <span>100 Triệu+</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="offcanvas-footer border-top border-secondary p-3 d-flex justify-content-between align-items-center">
+    <button class="btn btn-link text-info text-decoration-none" (click)="resetFilters()">Xóa bộ lọc</button>
+    <button class="btn-gradient px-4 py-2 rounded-3 fw-bold border-0" (click)="applyFilters()">Áp dụng</button>
+  </div>
+</div>
+
+@if (isOffcanvasOpen) {
+  <div class="offcanvas-backdrop fade show" (click)="toggleFilterMenu()"></div>
+}

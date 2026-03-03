@@ -1,1 +1,109 @@
-/* You can add global styles to this file, and also import other style files */
+// === VARIABLES & COLORS ===
+$bg-dark: #050505;
+$accent-cyan: #00d2ff;      // xanh cyan chính
+$accent-purple: #9d50bb;    // tím chính
+$accent-gradient: linear-gradient(90deg, $accent-cyan, $accent-purple);
+$glass-bg: rgba(255, 255, 255, 0.04);
+$glass-border: rgba(255, 255, 255, 0.08);
+$blur-strong: 120px;
+$blur-medium: 80px;
+
+// === ROOT & GLOBAL ===
+:root {
+  --bg-dark: #{$bg-dark};
+  --accent-gradient: #{$accent-gradient};
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+// === BLOB DECORATIVE (fixed, responsive) ===
+.blob-1,
+.blob-2 {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur($blur-strong);
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: -2;
+  animation: blob-float 25s infinite ease-in-out;
+}
+
+.blob-1 {
+  width: 700px;
+  height: 700px;
+  top: -200px;
+  right: -200px;
+  background: radial-gradient(circle at 30% 70%, rgba(0, 210, 255, 0.18) 0%, transparent 70%);
+}
+
+.blob-2 {
+  width: 600px;
+  height: 600px;
+  bottom: -180px;
+  left: -180px;
+  background: radial-gradient(circle at 70% 30%, rgba(157, 80, 187, 0.18) 0%, transparent 70%);
+}
+
+// Responsive cho blob (nhỏ lại trên mobile)
+@media (max-width: 768px) {
+  .blob-1, .blob-2 {
+    width: 400px;
+    height: 400px;
+    filter: blur(80px);
+    opacity: 0.15;
+  }
+  .blob-1 { top: -100px; right: -100px; }
+  .blob-2 { bottom: -100px; left: -100px; }
+}
+
+// Animation nhẹ cho blob (di chuyển chậm)
+@keyframes blob-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(40px, -40px) scale(1.05); }
+}
+
+// === TEXT GRADIENT ===
+.text-gradient {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
+  animation: gradient-flow 8s ease infinite;
+}
+
+// Animation gradient chảy nhẹ
+@keyframes gradient-flow {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+// === OPTIONAL: Glass effect helper (dùng cho card/search bar) ===
+.glass {
+  background: $glass-bg;
+  backdrop-filter: blur($blur-medium);
+  border: 1px solid $glass-border;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+// === HOVER GLOW (dùng cho button/card) ===
+.hover-glow {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(157, 80, 187, 0.25),
+                0 0 30px rgba(0, 210, 255, 0.15);
+  }
+}

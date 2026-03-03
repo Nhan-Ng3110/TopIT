@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TopIT.Core.DTOs;
 using TopIT.Core.Entities;
 using TopIT.Core.Interfaces;
 
@@ -24,9 +25,9 @@ namespace TopIT.API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> Search([FromQuery] string? keyWord, [FromQuery] string? Location)
+        public async Task<IActionResult> Search([FromQuery] JobSearchDto searchDto)
         {
-            var result = await _jobRepo.SearchJobAsync(keyWord, Location);
+            var result = await _jobRepo.SearchJobAsync(searchDto);
             return Ok(result);
 
         }
