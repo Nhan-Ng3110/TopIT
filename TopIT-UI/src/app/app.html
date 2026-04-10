@@ -1,34 +1,31 @@
 <header class="main-header navbar-modern sticky-top">
   <div class="container-fluid px-4 px-md-5">
     <div class="d-flex justify-content-between align-items-center py-3 py-md-4">
-      <!-- Logo -->
-      <a href="/" class="brand-logo d-flex align-items-center gap-2 text-decoration-none">
+      <a routerLink="/jobs" class="brand-logo d-flex align-items-center gap-2 text-decoration-none">
         <img src="assets/images/logo.png" alt="TopIT Logo" class="logo-img">
-
       </a>
 
-      <!-- Desktop Nav -->
       <nav class="nav-menu d-none d-md-flex align-items-center gap-4 gap-lg-5">
-        <a href="#" class="nav-link active">Tìm việc</a>
+        <a routerLink="/jobs" class="nav-link active" style="cursor: pointer;">Tìm việc</a>
         <a href="#" class="nav-link">Công ty</a>
-        <a href="#" class="nav-link">Đăng nhập</a>
+        
+        <a routerLink="/login" class="nav-link" style="cursor: pointer;">Đăng nhập</a>
+        
         <button class="btn-post-job btn-gradient fw-semibold px-4 py-2">
           Đăng tuyển
         </button>
       </nav>
 
-      <!-- Mobile Menu Toggle -->
       <button class="btn btn-link d-md-none text-white fs-3 hamburger" aria-label="Toggle menu">
         <i class="bi bi-list"></i>
       </button>
     </div>
 
-    <!-- Mobile Menu (ẩn mặc định, hiện khi click hamburger) -->
     <div class="mobile-menu d-md-none collapse" id="mobileMenu">
       <nav class="d-flex flex-column gap-3 py-3 px-4 bg-dark-secondary">
-        <a href="#" class="nav-link active fs-5">Tìm việc</a>
+        <a routerLink="/jobs" class="nav-link active fs-5">Tìm việc</a>
         <a href="#" class="nav-link fs-5">Công ty</a>
-        <a href="#" class="nav-link fs-5">Đăng nhập</a>
+        <a routerLink="/login" class="nav-link fs-5">Đăng nhập</a>
         <button class="btn-post-job btn-gradient fw-semibold py-3 w-100">
           Đăng tuyển
         </button>
@@ -37,9 +34,8 @@
   </div>
 </header>
 
-<!-- Nội dung chính -->
 <main class="pt-5 pt-md-0">
-  <app-job-list></app-job-list>
+  <router-outlet></router-outlet>
 </main>
 
 <footer class="main-footer py-5 mt-auto bg-darker border-top border-secondary">

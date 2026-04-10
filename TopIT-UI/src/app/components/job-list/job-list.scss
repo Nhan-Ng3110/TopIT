@@ -575,3 +575,56 @@
   .divider { display: none; }
   .btn-search-primary { width: 100%; border-radius: 12px; }
 }
+
+/* --- HIỆU ỨNG THANH TRƯỢT (SLIDER) --- */
+.custom-range {
+  -webkit-appearance: none; // Xóa style mặc định của trình duyệt
+  appearance: none;
+  width: 100%;
+  height: 6px; // Độ dày của thanh
+  border-radius: 5px;
+  outline: none;
+  transition: 0.1s;
+  
+  /* Cục cầm kéo (Thumb) cho Chrome/Safari */
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #00d2ff;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s;
+    box-shadow: 0 0 10px rgba(0, 210, 255, 0.5); // Phát sáng mặc định
+  }
+
+  /* Hiệu ứng khi di chuột vào cục kéo */
+  &::-webkit-slider-thumb:hover {
+    transform: scale(1.3); // Phóng to 30%
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.9); // Phát sáng mạnh hơn
+  }
+
+  /* Hiệu ứng khi nhấn giữ để kéo */
+  &:active::-webkit-slider-thumb {
+    transform: scale(1.1);
+    background: #ffffff; // Đổi lõi thành màu trắng khi kéo
+    box-shadow: 0 0 25px rgba(0, 210, 255, 1);
+  }
+
+  /* --- Hỗ trợ thêm cho Firefox --- */
+  &::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #00d2ff;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+  }
+  &::-moz-range-thumb:hover {
+    transform: scale(1.3);
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.9);
+  }
+}

@@ -1,0 +1,83 @@
+    .login-page {
+    background-color: #0a0a0c;
+    min-height: calc(100vh - 80px); /* Trừ đi độ cao của Header */
+    position: relative;
+    overflow: hidden;
+    }
+
+    /* Khối kính mờ rộng hơn cho layout 2 cột */
+    .glass-login-container {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 1000px; /* Độ rộng hoàn hảo cho 2 cột */
+    z-index: 10;
+    }
+
+    /* Kẻ sọc ngăn cách 2 cột trên màn hình Desktop */
+    @media (min-width: 992px) {
+    .border-end-lg {
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    }
+
+    /* Input kiểu mới, vuông vắn và chuyên nghiệp hơn */
+    .input-group-glass {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    
+    &:focus-within {
+        border-color: #00d2ff;
+        box-shadow: 0 0 10px rgba(0, 210, 255, 0.15);
+        background: rgba(255, 255, 255, 0.08);
+    }
+    
+    input::placeholder { color: #666; }
+    input:focus { outline: none; }
+    }
+
+    .btn-gradient {
+    background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+    color: white;
+    transition: opacity 0.3s, transform 0.2s;
+    &:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+    }
+
+    /* Cục màu trang trí nền */
+    .blob-bg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none; /* Không cản trở click chuột */
+    }
+
+    .blob {
+    position: absolute;
+    width: 450px;
+    height: 450px;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.35;
+    z-index: 0;
+    }
+
+    .blob-purple {
+    background: #7c3aed;
+    top: -10%;
+    right: -5%;
+    }
+
+    .blob-blue {
+    background: #00d2ff;
+    bottom: -15%;
+    left: -5%;
+    }

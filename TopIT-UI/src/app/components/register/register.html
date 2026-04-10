@@ -1,0 +1,90 @@
+    <div class="login-page d-flex align-items-center py-5">
+    <div class="blob-bg">
+        <div class="blob blob-purple"></div>
+        <div class="blob blob-blue"></div>
+    </div>
+
+    <div class="container position-relative z-index-1">
+        <div class="glass-login-container p-4 p-lg-5 mx-auto shadow-lg">
+        <div class="row gx-5 align-items-center">
+
+            <div class="col-lg-6 mb-5 mb-lg-0 border-end-lg pe-lg-5">
+            <h2 class="text-white fw-bold mb-3">Tạo tài khoản <span class="text-info">TopIT</span></h2>
+            <p class="text-secondary small mb-4">
+                Gia nhập cộng đồng Software Engineer để bứt phá sự nghiệp ngay hôm nay.
+            </p>
+
+            <form (ngSubmit)="onRegister()">
+                <div class="mb-3">
+                <label class="text-white mb-2 small fw-bold">Họ và tên <span class="text-danger">*</span></label>
+                <div class="input-group-glass d-flex align-items-center px-3 py-2">
+                    <input type="text" class="bg-transparent border-0 text-white w-100 shadow-none" 
+                        placeholder="Nguyễn Văn A" name="fullName" [(ngModel)]="registerData.fullName" required>
+                </div>
+                </div>
+
+                <div class="mb-3">
+                <label class="text-white mb-2 small fw-bold">Email <span class="text-danger">*</span></label>
+                <div class="input-group-glass d-flex align-items-center px-3 py-2">
+                    <input type="email" class="bg-transparent border-0 text-white w-100 shadow-none" 
+                        placeholder="name@example.com" name="email" [(ngModel)]="registerData.email" required>
+                </div>
+                </div>
+
+                <div class="mb-3">
+                <label class="text-white mb-2 small fw-bold">Mật khẩu <span class="text-danger">*</span></label>
+                <div class="input-group-glass d-flex align-items-center px-3 py-2">
+                    <input type="password" class="bg-transparent border-0 text-white w-100 shadow-none" 
+                        placeholder="Tối thiểu 8 ký tự" name="password" [(ngModel)]="registerData.password" required>
+                </div>
+                </div>
+
+                <div class="mb-4">
+                <label class="text-white mb-2 small fw-bold">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                <div class="input-group-glass d-flex align-items-center px-3 py-2">
+                    <input type="password" class="bg-transparent border-0 text-white w-100 shadow-none" 
+                        placeholder="Nhập lại mật khẩu" name="confirmPassword" [(ngModel)]="registerData.confirmPassword" required>
+                </div>
+                </div>
+
+                <form (ngSubmit)="onRegister()"> <button type="submit" class="btn-gradient w-100 py-3 fw-bold rounded-3 border-0 mb-3 fs-6">
+                        Đăng ký tài khoản
+                    </button>
+
+                </form>
+
+                <div class="text-center">
+                <p class="text-secondary small mb-0">Đã có tài khoản? 
+                    <a routerLink="/login" class="text-info fw-bold text-decoration-none" style="cursor: pointer;">Đăng nhập ngay!</a>
+                </p>
+                </div>
+            </form>
+            </div>
+
+            <div class="col-lg-6 ps-lg-5">
+            <h4 class="text-white fw-bold mb-4">Trở thành thành viên của TopIT để:</h4>
+            
+            <ul class="list-unstyled text-secondary d-flex flex-column gap-3">
+                <li class="d-flex align-items-start gap-3">
+                <i class="bi bi-rocket-takeoff-fill text-info fs-5"></i>
+                <span>Tiếp cận sớm nhất các vị trí tuyển dụng từ các tập đoàn công nghệ hàng đầu.</span>
+                </li>
+                <li class="d-flex align-items-start gap-3">
+                <i class="bi bi-shield-lock-fill text-info fs-5"></i>
+                <span>Bảo mật thông tin cá nhân và quản lý trạng thái hồ sơ thông minh.</span>
+                </li>
+                <li class="d-flex align-items-start gap-3">
+                <i class="bi bi-gift-fill text-info fs-5"></i>
+                <span>Nhận được các thông tin về sự kiện, workshop và quà tặng dành riêng cho Developer.</span>
+                </li>
+                <li class="d-flex align-items-start gap-3">
+                <i class="bi bi-stars text-info fs-5"></i>
+                <span>Xây dựng Profile chuyên nghiệp để thu hút các nhà tuyển dụng săn đón.</span>
+                </li>
+            </ul>
+            </div>
+
+        </div>
+        </div>
+    </div>
+    </div>

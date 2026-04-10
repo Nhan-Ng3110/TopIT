@@ -19,7 +19,7 @@ builder.Services.AddCors(options =>
         });
 });
 
-builder.Services.AddScoped<IJobRepository, JobRepository>();// DI
+builder.Services.AddScoped<IJobRepository, JobRepository>();
 builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 

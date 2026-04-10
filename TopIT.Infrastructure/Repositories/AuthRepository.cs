@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TopIT.Core.DTOs
+namespace TopIT.Infrastructure.Repositories
 {
-    public class ApplicationDto
+    internal class AuthRepository
     {
     }
 }
