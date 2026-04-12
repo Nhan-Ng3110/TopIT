@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
-export class Job {
+export class JobService {
   private http = inject(HttpClient);
   // Hãy đảm bảo port 7151 đúng với port Backend của bạn đang chạy
   private apiUrl = 'https://localhost:7151/api/Jobs'; 

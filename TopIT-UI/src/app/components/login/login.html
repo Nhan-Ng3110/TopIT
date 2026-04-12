@@ -1,68 +1,59 @@
-    <div class="login-page d-flex align-items-center py-5">
-    <div class="blob-bg">
-        <div class="blob blob-purple"></div>
-        <div class="blob blob-blue"></div>
-    </div>
-
-    <div class="container position-relative z-index-1">
-        <div class="glass-login-container p-4 p-lg-5 mx-auto shadow-lg">
+    <div class="login-page">
+    <div class="container">
+        <div class="auth-card mx-auto">
         <div class="row gx-5 align-items-center">
 
-            <div class="col-lg-6 mb-5 mb-lg-0 border-end-lg pe-lg-5">
-            <h2 class="text-white fw-bold mb-3">Chào mừng đến với <span class="text-info">TopIT</span></h2>
-            <p class="text-secondary small mb-4">
-                Bằng việc đăng nhập, bạn đồng ý với <a href="#" class="text-info text-decoration-none">Điều khoản dịch vụ</a> và <a href="#" class="text-info text-decoration-none">Chính sách bảo mật</a>.
+            <div class="col-lg-6 mb-5 mb-lg-0 divider-vertical pe-lg-5">
+            <h2 class="text-main fw-bold mb-3">Chào mừng đến với <span class="text-primary">TopIT</span></h2>
+            <p class="text-muted small mb-4">
+                Bằng việc đăng nhập, bạn đồng ý với <a href="#" class="text-primary text-decoration-none">Điều khoản dịch vụ</a> và <a href="#" class="text-primary text-decoration-none">Chính sách bảo mật</a>.
             </p>
 
-            <button class="btn btn-outline-light w-100 py-2 mb-4 d-flex justify-content-center align-items-center gap-2 rounded-3" style="border-color: rgba(255,255,255,0.2);">
+            <button class="social-btn-outline w-100 mb-4 d-flex justify-content-center align-items-center gap-2">
                 <i class="bi bi-google text-danger"></i> Đăng nhập với Google
             </button>
 
             <div class="d-flex align-items-center mb-4">
-                <hr class="flex-grow-1 border-secondary">
-                <span class="px-3 text-secondary small">hoặc</span>
-                <hr class="flex-grow-1 border-secondary">
+                <hr class="flex-grow-1 border-light">
+                <span class="px-3 text-muted small">hoặc</span>
+                <hr class="flex-grow-1 border-light">
             </div>
 
             <form (ngSubmit)="onLogin()">
-                <div class="mb-3">
-                <label class="text-white mb-2 small fw-bold">Email <span class="text-danger">*</span></label>
-                <div class="input-group-glass d-flex align-items-center px-3 py-2">
-                    <input type="email" class="bg-transparent border-0 text-white w-100 shadow-none" 
-                        placeholder="Nhập email của bạn..." name="username" [(ngModel)]="loginData.username" required>
-                </div>
-                </div>
-
-                <div class="mb-4">
-                <div class="d-flex justify-content-between">
-                    <label class="text-white mb-2 small fw-bold">Mật khẩu <span class="text-danger">*</span></label>
-                    <a href="#" class="text-info small text-decoration-none">Quên mật khẩu?</a>
-                </div>
-                <div class="input-group-glass d-flex align-items-center px-3 py-2">
-                    <input type="password" class="bg-transparent border-0 text-white w-100 shadow-none" 
-                        placeholder="••••••••" name="password" [(ngModel)]="loginData.password" required>
-                    <i class="bi bi-eye-slash text-secondary" style="cursor: pointer;"></i>
-                </div>
+                <div class="input-group-custom mb-3">
+                    <label class="small">Email <span class="text-danger">*</span></label>
+                    <div class="input-wrapper">
+                        <input type="email" placeholder="Nhập email của bạn..." name="email" [(ngModel)]="loginData.email" required>
+                    </div>
                 </div>
 
-                <form (ngSubmit)="onLogin()">
-                    <button type="submit" class="btn-gradient w-100 py-3 fw-bold rounded-3 border-0 mb-3 fs-6">
-                        Đăng nhập
-                    </button>
-                </form>
+                <div class="input-group-custom mb-4">
+                    <div class="d-flex justify-content-between">
+                        <label class="small">Mật khẩu <span class="text-danger">*</span></label>
+                        <a href="#" class="text-primary small text-decoration-none">Quên mật khẩu?</a>
+                    </div>
+                    <div class="input-wrapper d-flex align-items-center">
+                        <input type="password" placeholder="••••••••" name="password" [(ngModel)]="loginData.password" required>
+                        <i class="bi bi-eye-slash text-muted" style="cursor: pointer;"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary-gradient w-100 mb-3 fs-6">
+                    Đăng nhập
+                </button>
 
                 <div class="text-center">
-                <p class="text-secondary small mb-0">Chưa có tài khoản? 
-                    <a routerLink="/register" class="text-info fw-bold text-decoration-none" style="cursor: pointer;">Đăng ký ngay!</a>
+                <p class="text-muted small mb-0">Chưa có tài khoản? 
+                    <a routerLink="/register" class="text-primary fw-bold text-decoration-none" style="cursor: pointer;">Đăng ký ngay!</a>
                 </p>
                 </div>
             </form>
             </div>
 
             <div class="col-lg-6 ps-lg-5">
-            <h4 class="text-white fw-bold mb-4" style="line-height: 1.5;">Đăng nhập để nhận ngay các đặc quyền và thông tin lương chuẩn xác</h4>
+            <h4 class="text-main fw-bold mb-4" style="line-height: 1.5;">Đăng nhập để nhận ngay các đặc quyền và thông tin lương chuẩn xác</h4>
             
-            <ul class="list-unstyled text-secondary d-flex flex-column gap-3">
+            <ul class="list-unstyled text-muted d-flex flex-column gap-3">
                 <li class="d-flex align-items-start gap-3">
                 <i class="bi bi-check-circle-fill text-success fs-5"></i>
                 <span>Xem mức lương chi tiết để dễ dàng thương lượng offer hoặc yêu cầu tăng lương.</span>

@@ -1,9 +1,9 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using TopIT.Core.DTOs; 
+using TopIT.Core.DTOs;
+using TopIT.Core.Entities;
+using TopIT.Core.Interfaces;
 
 namespace TopIT.API.Controllers
 {
@@ -11,62 +11,45 @@ namespace TopIT.API.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
+        private readonly IAuthRepository _authRepo;
+        private readonly IMapper _mapper;
 
-        public AuthController(IConfiguration configuration)
+        public AuthController(IAuthRepository authRepo, IMapper mapper)
         {
-            _configuration = configuration;
-        }
-
-        [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginDto loginDto)
-        {
-            if (loginDto.Username == "admin" && loginDto.Password == "password")
-            {
-                var token = GenerateJwtToken(loginDto.Username);
-                return Ok(new { Token = token });
-            }
-            return Unauthorized(new { Message = "Sai tài khoản hoặc mật khẩu rồi!" });
-        }
-
-        private string GenerateJwtToken(string username)
-        {
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.Name, username),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) 
-            };
-
-            
-            var jwtKey = _configuration["Jwt:Key"];
-            if (string.IsNullOrEmpty(jwtKey)) jwtKey = "Chuoi_Bi_Mat_Sieu_Cap_Vip_Pro_2026"; 
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddHours(1),
-                signingCredentials: creds
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            _authRepo = authRepo;
+            _mapper = mapper;
         }
 
         [HttpPost("register")]
-        public IActionResult Register([FromBody] RegisterDto registerDto)
+        public async Task<IActionResult> Register(RegisterDto registerDto)
         {
-            
-            if (registerDto == null) return BadRequest("Dữ liệu không hợp lệ");
-
-           
-            return Ok(new
+            try 
             {
-                Message = $"Tài khoản {registerDto.Email} đã được tạo thành công!"
-            });
+                if (await _authRepo.UserExists(registerDto.Email.ToLower()))
+                    return BadRequest(new { message = "Email đã tồn tại trong hệ thống." });
+
+                var userToCreate = _mapper.Map<User>(registerDto);
+                userToCreate.Email = registerDto.Email.ToLower();
+
+                var createdUser = await _authRepo.Register(userToCreate, registerDto.Password);
+
+                return StatusCode(201, new { message = "Đăng ký thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi hệ thống khi đăng ký", details = ex.Message });
+            }
         }
 
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(LoginDto loginDto)
+        {
+            var token = await _authRepo.Login(loginDto.Email.ToLower(), loginDto.Password);
+
+            if (token == null)
+                return Unauthorized("Invalid email or password");
+
+            return Ok(new { token });
+        }
     }
 }

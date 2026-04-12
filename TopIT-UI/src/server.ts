@@ -9,6 +9,11 @@ import { join } from 'node:path';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
+// Cho phép chứng chỉ SSL tự ký trong môi trường phát triển (Sửa lỗi DEPTH_ZERO_SELF_SIGNED_CERT)
+if (process.env['NODE_ENV'] !== 'production') {
+  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+}
+
 const app = express();
 const angularApp = new AngularNodeAppEngine();
 

@@ -36,7 +36,11 @@ export class RegisterComponent {
       },
       error: (err) => {
         console.error(err);
-        alert('Đăng ký thất bại: ' + (err.error?.message || 'Email đã tồn tại hoặc lỗi hệ thống'));
+        if (err.status === 0) {
+          alert('Lỗi kết nối API: Không thể kết nối tới máy chủ. Nhân ơi, hãy kiểm tra xem API (backend) đã chạy chưa nhé!');
+        } else {
+          alert('Đăng ký thất bại: ' + (err.error?.message || 'Email đã tồn tại hoặc lỗi hệ thống'));
+        }
       }
     });
   }

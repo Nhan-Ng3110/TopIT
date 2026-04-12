@@ -11,22 +11,22 @@
         
         <a routerLink="/login" class="nav-link" style="cursor: pointer;">Đăng nhập</a>
         
-        <button class="btn-post-job btn-gradient fw-semibold px-4 py-2">
+        <button class="btn-post-job">
           Đăng tuyển
         </button>
       </nav>
 
-      <button class="btn btn-link d-md-none text-white fs-3 hamburger" aria-label="Toggle menu">
+      <button class="btn btn-link d-md-none text-main fs-3 hamburger" aria-label="Toggle menu">
         <i class="bi bi-list"></i>
       </button>
     </div>
 
     <div class="mobile-menu d-md-none collapse" id="mobileMenu">
-      <nav class="d-flex flex-column gap-3 py-3 px-4 bg-dark-secondary">
+      <nav class="d-flex flex-column gap-3 py-3 px-4 bg-white">
         <a routerLink="/jobs" class="nav-link active fs-5">Tìm việc</a>
         <a href="#" class="nav-link fs-5">Công ty</a>
         <a routerLink="/login" class="nav-link fs-5">Đăng nhập</a>
-        <button class="btn-post-job btn-gradient fw-semibold py-3 w-100">
+        <button class="btn-post-job w-100">
           Đăng tuyển
         </button>
       </nav>
@@ -38,13 +38,13 @@
   <router-outlet></router-outlet>
 </main>
 
-<footer class="main-footer py-5 mt-auto bg-darker border-top border-secondary">
-  <div class="container text-center text-secondary small">
-    © 2026 TopIT Platform • Verified Tech Jobs
-    <div class="mt-2">
-      <a href="#" class="text-secondary mx-2 hover-text-white">Điều khoản</a>
-      <span>•</span>
-      <a href="#" class="text-secondary mx-2 hover-text-white">Chính sách bảo mật</a>
+<footer class="main-footer mt-auto">
+  <div class="container text-center small">
+    <p class="mb-2">© 2026 TopIT Platform • Công việc IT đã xác thực</p>
+    <div class="d-flex justify-content-center gap-3">
+      <a href="#" class="text-decoration-none">Điều khoản</a>
+      <span class="text-muted">•</span>
+      <a href="#" class="text-decoration-none">Chính sách bảo mật</a>
     </div>
   </div>
 </footer>

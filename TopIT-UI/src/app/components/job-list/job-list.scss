@@ -1,630 +1,284 @@
 @import "../../../styles.scss";
 
 .job-list-page {
-  padding-bottom: 50px;
+  padding-bottom: 80px;
+  background-color: var(--bg-secondary);
+  min-height: 100vh;
 }
 
-
-.job-container {
-  max-width: 1000px; 
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
-// --- MODERN SEARCH BAR ---
-.search-command-bar {
-  display: flex;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  padding: 8px;
-  margin: 40px auto;
-  z-index: 10;
-
-  .search-group {
-    display: flex;
-    align-items: center;
-    flex: 1;
-    input {
-      background: transparent;
-      border: none;
-      color: white;
-      padding: 10px;
-      width: 100%;
-      outline: none;
-    }
-  }
-
-  .btn-execute {
-    background: white;
-    color: black;
-    border: none;
-    padding: 10px 25px;
-    border-radius: 14px;
-    font-weight: 700;
-    transition: 0.3s;
-    &:hover { background: #00d2ff; color: white; }
-  }
-}
-
-// --- GLASS CARD ---
-.glass-card {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
-  padding: 25px;
-  margin-bottom: 20px;
-  transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-  &:hover {
-    border-color: rgba(0, 210, 255, 0.4);
-    background: rgba(255, 255, 255, 0.05);
-    transform: translateY(-5px); // Bay lên nhẹ nhìn sẽ xịn hơn
-  }
-
-  .company-logo {
-    width: 48px;
-    height: 48px;
-    background: linear-gradient(45deg, #00d2ff, #9d50bb);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-  }
-}
-
-.tech-tag {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 4px 12px;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  margin-right: 8px;
-  &.salary { color: #00d2ff; }
-}
-
-.btn-apply-now {
-  background: transparent;
-  border: 1px solid #00d2ff;
-  color: #00d2ff;
-  padding: 8px 25px;
-  border-radius: 12px;
-  font-weight: 600;
-  transition: 0.3s;
-  &:hover { background: #00d2ff; color: black; }
-}
-
-// Animation nhấp nháy cho Verified
-.pulse { animation: pulse-animation 2s infinite; }
-@keyframes pulse-animation {
-  0% { box-shadow: 0 0 0 0px rgba(76, 209, 55, 0.4); }
-  100% { box-shadow: 0 0 0 10px rgba(76, 209, 55, 0); }
-}
-
-// CSS Chia 2 cột (Master - Detail)
-.master-detail-grid {
-  display: grid;
-  grid-template-columns: 4fr 8fr; // Tỷ lệ cột 4/8 (Giống ITviec)
-  gap: 30px;
-  align-items: start;
-}
-
-// Cột trái: Có thanh cuộn dọc
-.job-list-col {
-  height: 80vh; // Chiều cao cố định
-  overflow-y: auto;
-  padding-right: 15px;
-  
-  // Custom Scrollbar mỏng, đẹp
-  &::-webkit-scrollbar { width: 6px; }
-  &::-webkit-scrollbar-track { background: transparent; }
-  &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-  &::-webkit-scrollbar-thumb:hover { background: rgba(0, 210, 255, 0.5); }
-}
-
-// Cột phải: Cố định khi cuộn (Sticky)
-.job-detail-col {
-  position: sticky;
-  top: 20px; 
-  height: 80vh;
-}
-
-// Tùy chỉnh Card rút gọn bên trái
-.glass-card.compact {
-  cursor: pointer;
-  padding: 20px;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  // Viền sáng lên khi Card được click (Active)
-  &.active-card {
-    border: 1px solid #00d2ff;
-    background: rgba(0, 210, 255, 0.05);
-    box-shadow: inset 4px 0 0 #00d2ff; // Đường viền xanh bên trái
-  }
-}
-
-// Chỉnh lại kích thước Logo cho phù hợp 2 cột
-.company-logo.small { width: 45px; height: 45px; font-size: 1.2rem; }
-.company-logo.large { width: 80px; height: 80px; font-size: 2.5rem; border-radius: 20px; }
-
-.cursor-pointer { cursor: pointer; }
-
-/* --- FILTER BAR --- */
-.filter-bar-glass {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.glass-select {
-  background-color: transparent;
-  color: #e2e8f0;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  cursor: pointer;
-  
-  &:focus {
-    background-color: transparent;
-    border-color: #00d2ff;
-    box-shadow: 0 0 0 0.25rem rgba(0, 210, 255, 0.25);
-    color: white;
-  }
-  
-  option {
-    background-color: #111; /* Nền tối cho dropdown */
-    color: white;
-  }
-}
-
-.btn-filter-main {
-  background: transparent;
-  color: #e2e8f0;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 8px 20px;
-  border-radius: 20px;
-  transition: 0.3s;
-  
-  &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: #e2e8f0;
-  }
-}
-
-/* --- OFFCANVAS SIDEBAR (Menu trượt) --- */
-.glass-offcanvas {
-  background: rgba(10, 10, 12, 0.95) !important;
-  backdrop-filter: blur(25px);
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
-  width: 400px !important;
-}
-
-/* Filter Pills (Nút chọn Level/Model) */
-.filter-pill {
-  background: transparent;
-  color: #94a3b8;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 6px 16px;
-  border-radius: 25px;
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
-  
-  i { transition: 0.3s; }
-
-  &:hover {
-    border-color: #00d2ff;
-    color: #00d2ff;
-  }
-
-  &.active-pill {
-    background: rgba(0, 210, 255, 0.1);
-    border-color: #00d2ff;
-    color: #00d2ff;
-    
-    i::before {
-      content: "\f272"; /* Đổi icon plus thành check/dash tùy ý, F272 là dấu check trong Bootstrap icon */
-    }
-  }
-}
-
-/* Range Slider Custom */
-.custom-range {
-  &::-webkit-slider-thumb {
-    background: #00d2ff;
-  }
-  &::-webkit-slider-runnable-track {
-    background: rgba(255, 255, 255, 0.2);
-  }
-}
-
-/* Custom Checkbox */
-.glass-search-box {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  
-  input:focus { outline: none; }
-}
-
-.custom-checkbox .form-check-input {
-  background-color: transparent;
-  border-color: rgba(255,255,255,0.3);
-  
-  &:checked {
-    background-color: #7c3aed;
-    border-color: #7c3aed;
-  }
-}
-
-/* --- CUSTOM DROPDOWN CHECKBOX --- */
-.dropdown-menu-glass {
-  position: absolute;
-  top: 120%; 
-  left: 0;
-  z-index: 9999 !important;
-  min-width: 200px;
-  background: rgba(15, 15, 20, 0.95);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  
-
-  visibility: hidden;
-  opacity: 0;
-  transform: translateY(-10px);
-  transition: all 0.3s ease;
-  
-  &.show {
-    visibility: visible;
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// Định dạng lại nút để nhìn giống thẻ Select
-.glass-select {
-  background: transparent;
-  color: #e2e8f0;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  padding: 8px 20px;
-  
-  &:hover {
-    border-color: #00d2ff;
-    color: white;
-  }
-}
-
-/* Đảm bảo Backdrop của Offcanvas luôn nằm trên cùng */
-.offcanvas-backdrop {
-  z-index: 1040;
-}
-.glass-offcanvas {
-  z-index: 1045;
-}
-
-/* --- FILTER BAR & CUSTOM DROPDOWN --- */
-.filter-bar-glass {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+// --- HERO SECTION ---
+.hero-section {
+  background: white;
+  border-bottom: 1px solid var(--border-color);
+  padding: 60px 0;
   position: relative;
-  z-index: 1010; /* Đảm bảo cả thanh filter nằm trên vùng danh sách job */
-  overflow: visible !important; /* Cho phép dropdown hiển thị tràn ra ngoài */
 }
 
-.glass-select {
-  background: transparent;
-  color: #e2e8f0;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  padding: 8px 20px;
+.hero-title { color: var(--text-main); letter-spacing: -0.02em; }
+
+// --- SEARCH WRAPPER ---
+.search-wrapper-light {
+  background: white;
+  border-radius: 100px;
+  padding: 10px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-color);
+  max-width: 950px;
+  transition: all 0.3s ease;
+  position: relative;
+  margin: 0 auto;
+}
+
+.search-input-group {
+  display: flex;
+  align-items: center;
+  padding: 0 25px;
+  flex: 1;
+  min-width: 0;
   
-  &:hover {
-    border-color: #00d2ff;
-    color: white;
+  i { color: var(--primary-color); margin-right: 15px; font-size: 1.25rem; }
+  
+  input {
+    border: none; width: 100%; outline: none; font-size: 1rem;
+    font-weight: 500; color: #0f172a !important; background: transparent;
+    &::placeholder { color: #94a3b8; }
+  }
+
+  .custom-select-trigger {
+     font-size: 1rem; font-weight: 500; color: #0f172a;
   }
 }
 
-.dropdown-menu-glass {
+.vertical-line { width: 1px; height: 35px; background: var(--border-color); }
+
+.btn-search-main {
+  background: var(--accent-gradient);
+  color: white; border: none; padding: 15px 40px; border-radius: 50px;
+  font-weight: 700; transition: all 0.3s ease;
+  &:hover { box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3); transform: translateY(-2px); }
+}
+
+// --- LOCATION MEGAMENU (WIDER & PREMIUM) ---
+.location-megamenu {
   position: absolute;
-  top: 120%; 
+  top: calc(100% + 15px);
   left: 0;
-  z-index: 1000;
-  min-width: 200px;
-  background: rgba(15, 15, 20, 0.95);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  
-  /* Hidden by default */
+  right: 0; // Tràn ra toàn bộ chiều rộng thanh Search (950px)
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 28px;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.15);
+  z-index: 10000;
   visibility: hidden;
   opacity: 0;
-  transform: translateY(-10px);
-  transition: all 0.3s ease;
-  
+  transform: translateY(15px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  cursor: default;
+
   &.show {
     visibility: visible;
     opacity: 1;
     transform: translateY(0);
   }
+
+  .megamenu-header {
+    background: #fafafa;
+    
+    .search-box-inner {
+      position: relative;
+      i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #64748b; }
+      input {
+        width: 100%; padding: 18px 15px 18px 48px;
+        border: none; background: transparent;
+        outline: none; font-size: 0.95rem; font-weight: 600;
+        &:focus { background: white; }
+      }
+    }
+  }
+
+  .megamenu-body { 
+    height: 480px; 
+    
+    // Tinh chỉnh thanh cuộn cho toàn bộ megamenu
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+  }
+
+  .province-col {
+    width: 300px;
+    overflow-y: auto;
+    background: #ffffff;
+    
+    .province-item {
+      padding: 18px 25px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 4px solid transparent;
+
+      &:hover, &.active {
+        background: #f8faff;
+        color: var(--primary-color);
+        border-left-color: var(--primary-color);
+      }
+
+      .province-name { font-weight: 700; font-size: 1.05rem; color: #1e293b; }
+      .form-check-input { width: 1.1rem; height: 1.1rem; cursor: pointer; }
+    }
+  }
+
+  .district-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #fbfcfd;
+    
+    .district-items {
+      overflow-y: auto;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr; // Chuyển sang 3 cột cho thoáng
+      gap: 12px;
+    }
+    
+    .district-item {
+      padding: 14px 18px;
+      background: white;
+      border: 1px solid #edf2f7;
+      border-radius: 14px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+      
+      &:hover { 
+        border-color: var(--primary-color); 
+        background: #f0f7ff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08); 
+      }
+      
+      .form-check { margin: 0; }
+      .form-check-input { cursor: pointer; width: 1.1rem; height: 1.1rem; margin-right: 12px; border-radius: 4px; }
+      .form-check-label { cursor: pointer; font-weight: 600; font-size: 0.95rem; color: #475569; }
+    }
+  }
+
+  .megamenu-footer {
+    background: white;
+    padding: 20px 30px;
+    .btn-link { font-size: 1rem; color: #64748b; }
+    .btn-primary { border-radius: 50px; padding: 12px 60px; font-size: 1rem; }
+  }
 }
 
-.btn-filter-main {
-  background: transparent;
-  color: #e2e8f0;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 8px 20px;
+// Custom Checkbox
+.form-check-input:checked {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+// --- QUICK FILTERS (Level, Model) ---
+.filter-bar-light { 
+  padding: 15px 0; 
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 25px;
+}
+
+.btn-filter-outline {
+  background: white; 
+  border: 1.5px solid #cbd5e1; // Viền đậm hơn chút để "tô lại viền"
+  color: #1e293b;
+  padding: 10px 22px; 
+  border-radius: 16px; 
+  font-size: 0.95rem; 
+  font-weight: 700;
+  transition: all 0.2s ease; 
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  
+  &:hover { 
+    border-color: var(--primary-color); 
+    background: #f8faff; 
+    color: var(--primary-color); 
+    transform: translateY(-1px);
+  }
+  
+  &.active-pill { 
+    background: var(--primary-color); 
+    color: white; 
+    border-color: var(--primary-color); 
+  }
+}
+
+.filter-dropdown {
+  position: absolute; 
+  top: 100%; 
+  left: 0; 
+  margin-top: 12px;
+  background: white; 
+  border: 1.5px solid #cbd5e1; // Tô viền rõ ràng
   border-radius: 20px;
-  transition: 0.3s;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12); 
+  min-width: 250px; 
+  padding: 24px;
+  z-index: 1000; 
+  visibility: hidden; 
+  opacity: 0; 
+  transform: translateY(-10px);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
   
-  &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: #e2e8f0;
+  &.show { 
+    visibility: visible; 
+    opacity: 1; 
+    transform: translateY(0); 
+    pointer-events: all;
   }
 }
 
-/* --- MASTER-DETAIL GRID --- */
-.master-detail-grid {
-  display: grid;
-  grid-template-columns: 4fr 8fr; 
-  gap: 30px;
-  align-items: start;
+// --- GRID LAYOUT ---
+.master-detail-grid { display: grid; grid-template-columns: 420px 1fr; gap: 30px; align-items: start; }
+.job-list-col { height: calc(100vh - 120px); overflow-y: auto; }
+.job-card-light {
+  background: white; border: 1px solid var(--border-color); border-radius: 20px; padding: 24px; margin-bottom: 20px;
+  &.active { border-color: var(--primary-color); background: #f0f7ff; }
 }
 
-.job-list-col {
-  height: 80vh; 
-  overflow-y: auto;
-  padding-right: 15px;
-  
-  &::-webkit-scrollbar { width: 6px; }
-  &::-webkit-scrollbar-track { background: transparent; }
-  &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-  &::-webkit-scrollbar-thumb:hover { background: rgba(0, 210, 255, 0.5); }
-}
+.detail-view-card { background: white; border: 1px solid var(--border-color); border-radius: 28px; height: 100%; overflow-y: auto; padding: 40px;}
 
-.job-detail-col {
-  position: sticky;
-  top: 20px; 
-  height: 80vh;
-}
+// --- OFFCANVAS (Bộ lọc nâng cao) ---
+.offcanvas {
+  background: white;
+  border-left: 1px solid var(--border-color);
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease-in-out;
+  z-index: 100050; 
+  width: 450px !important;
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  visibility: hidden; 
+  transform: translateX(100%);
 
-.glass-card.compact {
-  cursor: pointer;
-  padding: 20px;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.05);
+  &.show { 
+    visibility: visible;
+    transform: translateX(0); 
   }
 
-  &.active-card {
-    border: 1px solid #00d2ff;
-    background: rgba(0, 210, 255, 0.05);
-    box-shadow: inset 4px 0 0 #00d2ff; 
-  }
-}
-
-.company-logo.small { width: 45px; height: 45px; font-size: 1.2rem; }
-.company-logo.large { width: 80px; height: 80px; font-size: 2.5rem; border-radius: 20px; }
-
-/* --- OFFCANVAS SIDEBAR --- */
-.glass-offcanvas {
-  background: rgba(10, 10, 12, 0.95) !important;
-  backdrop-filter: blur(25px);
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
-  width: 400px !important;
-  z-index: 1045;
+  .offcanvas-header { padding: 25px; border-bottom: 1px solid var(--border-color); }
+  .offcanvas-body { padding: 25px; }
 }
 
 .offcanvas-backdrop {
-  z-index: 1040;
-}
-
-.filter-pill {
-  background: transparent;
-  color: #94a3b8;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 6px 16px;
-  border-radius: 25px;
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
-  
-  i { transition: 0.3s; }
-
-  &:hover {
-    border-color: #00d2ff;
-    color: #00d2ff;
-  }
-
-  &.active-pill {
-    background: rgba(0, 210, 255, 0.1);
-    border-color: #00d2ff;
-    color: #00d2ff;
-    
-    i::before {
-      content: "\f272"; 
-    }
-  }
-}
-
-.custom-range {
-  &::-webkit-slider-thumb {
-    background: #00d2ff;
-  }
-  &::-webkit-slider-runnable-track {
-    background: rgba(255, 255, 255, 0.2);
-  }
-}
-
-.glass-search-box {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  
-  input:focus { outline: none; }
-}
-
-.custom-checkbox .form-check-input {
-  background-color: transparent;
-  border-color: rgba(255,255,255,0.3);
-  
-  &:checked {
-    background-color: #7c3aed;
-    border-color: #7c3aed;
-  }
-}
-
-.cursor-pointer { cursor: pointer; }
-
-/* --- THANH TÌM KIẾM PRO (TopIT Style) --- */
-.glass-search-wrapper {
-  display: flex;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 100px; // Bo tròn hai đầu
-  padding: 5px;
-  max-width: 900px;
-  width: 100%;
-  
-  &:focus-within {
-    border-color: rgba(0, 210, 255, 0.5);
-    box-shadow: 0 0 20px rgba(0, 210, 255, 0.15);
-  }
-}
-
-.search-block {
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  height: 50px;
-  
-  i {
-    font-size: 1.2rem;
-    margin-right: 12px;
-  }
-  
-  input, select {
-    background: transparent;
-    border: none;
-    color: white;
-    width: 100%;
-    outline: none;
-    font-size: 1.05rem;
-    
-    &::placeholder {
-      color: rgba(255, 255, 255, 0.5);
-    }
-  }
-  
-  select {
-    cursor: pointer;
-    option { background: #1a1a2e; color: white; }
-  }
-}
-
-.keyword-block {
-  flex: 5; // Chiếm nhiều không gian nhất
-}
-
-.location-block {
-  flex: 3;
-}
-
-.divider {
-  width: 1px;
-  height: 30px;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.btn-search-primary {
-  background: linear-gradient(45deg, #00d2ff, #7c3aed);
-  color: white;
-  border: none;
-  border-radius: 50px; // Bo tròn nút
-  height: 50px;
-  padding: 0 35px;
-  font-weight: 600;
-  font-size: 1.1rem;
-  transition: 0.3s;
-  
-  &:hover {
-    transform: scale(1.02);
-    box-shadow: 0 5px 15px rgba(124, 58, 237, 0.4);
-  }
-}
-
-/* Responsive cho Mobile */
-@media (max-width: 768px) {
-  .glass-search-wrapper {
-    flex-direction: column;
-    border-radius: 20px;
-    padding: 15px;
-    gap: 10px;
-  }
-  
-  .search-block { padding: 0 10px; width: 100%; }
-  .divider { display: none; }
-  .btn-search-primary { width: 100%; border-radius: 12px; }
-}
-
-/* --- HIỆU ỨNG THANH TRƯỢT (SLIDER) --- */
-.custom-range {
-  -webkit-appearance: none; // Xóa style mặc định của trình duyệt
-  appearance: none;
-  width: 100%;
-  height: 6px; // Độ dày của thanh
-  border-radius: 5px;
-  outline: none;
-  transition: 0.1s;
-  
-  /* Cục cầm kéo (Thumb) cho Chrome/Safari */
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: #00d2ff;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s;
-    box-shadow: 0 0 10px rgba(0, 210, 255, 0.5); // Phát sáng mặc định
-  }
-
-  /* Hiệu ứng khi di chuột vào cục kéo */
-  &::-webkit-slider-thumb:hover {
-    transform: scale(1.3); // Phóng to 30%
-    box-shadow: 0 0 20px rgba(0, 210, 255, 0.9); // Phát sáng mạnh hơn
-  }
-
-  /* Hiệu ứng khi nhấn giữ để kéo */
-  &:active::-webkit-slider-thumb {
-    transform: scale(1.1);
-    background: #ffffff; // Đổi lõi thành màu trắng khi kéo
-    box-shadow: 0 0 25px rgba(0, 210, 255, 1);
-  }
-
-  /* --- Hỗ trợ thêm cho Firefox --- */
-  &::-moz-range-thumb {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: #00d2ff;
-    cursor: pointer;
-    border: none;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
-  }
-  &::-moz-range-thumb:hover {
-    transform: scale(1.3);
-    box-shadow: 0 0 20px rgba(0, 210, 255, 0.9);
-  }
+  z-index: 100040;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
 }

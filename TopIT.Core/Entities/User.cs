@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +13,7 @@ namespace TopIT.Core.Entities
         public string Email { get; set; }
         public byte[] PasswordHash { get; set; } = new byte[0];
         public byte[] PasswordSalt { get; set; } = new byte[0];
-        public string Role { get; set; }
+        public string Role { get; set; } = "Candidate";
 
 
         public ICollection<JobApplication> Applications { get; set; } = new List<JobApplication>();

@@ -1,172 +1,84 @@
-// === VARIABLES ===
-$bg-dark: #050505;
-$bg-darker: #020202;
-$glass-bg: rgba(13, 17, 23, 0.65);         // nền mờ kính
-$glass-border: rgba(255, 255, 255, 0.08);
-$accent-cyan: #00d2ff;
-$accent-purple: #9d50bb;
-$gradient-primary: linear-gradient(90deg, $accent-cyan, $accent-purple);
-$text-primary: #e2e8f0;
-$text-secondary: #94a3b8;
+// === VARIABLES (Light Theme) ===
+$bg-white: #ffffff;
+$bg-light: #eceff1; // Darkened further from f1f5f9 for better contrast
+$primary-blue: #2563eb;
+$text-main: #0f172a;
+$text-muted: #64748b;
+$border-light: #e2e8f0;
+$shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
 
 // === HEADER ===
 .navbar-modern {
-  background: $glass-bg;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px); // cho Safari
-  border-bottom: 1px solid $glass-border;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid $border-light;
   position: sticky;
   top: 0;
-  z-index: 1000;
-  transition: background 0.3s ease;
+  z-index: 9999; // Set very high to avoid overlap
+  box-shadow: $shadow-sm;
 
-  // Logo
   .brand-logo {
     display: flex;
     align-items: center;
-    gap: 10px;
     text-decoration: none;
-
     .logo-img {
-      height: 100px;               
-      transition: transform 0.4s ease;
+      height: 80px;               
+      transition: transform 0.3s ease;
     }
-
-    .logo-text {
-      font-size: 1.8rem;
-      font-weight: 800;
-      background: $gradient-primary;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    &:hover {
-      .logo-img {
-        transform: scale(1.1);
-        filter: drop-shadow(0 0 12px rgba(0, 210, 255, 0.6));
-      }
-    }
+    &:hover .logo-img { transform: scale(1.05); }
   }
 
-  // Nav menu desktop
   .nav-menu {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-
     .nav-link {
-      color: $text-secondary;
-      font-weight: 500;
-      font-size: 1rem;
-      position: relative;
-      padding: 8px 0;
-      transition: color 0.3s ease;
-
-      &::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        width: 0;
-        height: 2px;
-        background: $gradient-primary;
-        transition: width 0.4s ease;
-        transform: translateX(-50%);
-      }
-
-      &:hover,
-      &.active {
-        color: $text-primary;
-        &::after {
-          width: 80%;
-        }
-      }
+      color: $text-muted;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: color 0.2s;
+      &:hover, &.active { color: $primary-blue; }
     }
   }
 
-  // Button Đăng tuyển
   .btn-post-job {
-    background: $gradient-primary;
+    background: $primary-blue;
     color: white;
     border: none;
-    border-radius: 12px;
+    border-radius: 100px;
     padding: 10px 24px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    box-shadow: 0 6px 20px rgba(157, 80, 187, 0.3);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    &:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 40px rgba(157, 80, 187, 0.5);
-      filter: brightness(1.08);
-    }
-
-    &:active {
-      transform: translateY(0);
-    }
+    font-weight: 700;
+    transition: all 0.3s ease;
+    &:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
   }
 
-  // Hamburger (mobile)
   .hamburger {
-    font-size: 2rem;
-    color: $text-primary;
-    background: transparent;
+    color: $text-main;
     border: none;
-    transition: transform 0.3s;
-    &:focus { outline: none; }
-    &:hover { transform: rotate(90deg); }
+    background: transparent;
   }
 }
 
 // Mobile menu
 .mobile-menu {
-  background: rgba(5, 5, 5, 0.95);
-  backdrop-filter: blur(12px);
-  border-top: 1px solid $glass-border;
-
+  background: white;
+  border-top: 1px solid $border-light;
   .nav-link {
-    color: $text-secondary;
-    font-size: 1.25rem;
-    padding: 12px 0;
-    display: block;
-    text-align: center;
-    transition: color 0.3s;
-
-    &:hover, &.active {
-      color: $text-primary;
-    }
-  }
-
-  .btn-post-job {
-    width: 100%;
-    padding: 14px;
-    font-size: 1.1rem;
+    color: $text-main;
+    font-weight: 600;
+    text-decoration: none;
+    &.active { color: $primary-blue; }
   }
 }
 
 // === FOOTER ===
 .main-footer {
-  background: $bg-darker;
-  border-top: 1px solid $glass-border;
-  color: $text-secondary;
-  padding: 40px 0 30px;
-
+  background: $bg-light;
+  border-top: 1px solid $border-light;
+  color: $text-muted;
+  padding: 60px 0;
   a {
-    color: $text-secondary;
+    color: $text-muted;
     text-decoration: none;
-    transition: color 0.3s;
-    &:hover { color: $text-primary; }
+    &:hover { color: $primary-blue; }
   }
-
-  .small {
-    font-size: 0.9rem;
-  }
-}
-
-// === ANIMATION ===
-@keyframes logo-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.95; }
-  50%      { transform: scale(1.06); opacity: 1; }
-}
+}

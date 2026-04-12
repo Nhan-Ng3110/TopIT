@@ -1,8 +1,8 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Job } from '../../services/job'; 
-import { ApplicationService } from '../../services/application'; // 1. Nhớ import service nộp đơn
+import { JobService } from '../../services/job'; 
+import { ApplicationService } from '../../services/application'; 
 
 @Component({
   selector: 'app-job-list',
@@ -12,21 +12,44 @@ import { ApplicationService } from '../../services/application'; // 1. Nhớ imp
   styleUrl: './job-list.scss',
 })
 export class JobListComponent implements OnInit {
-  private jobService = inject(Job);
+  private jobService = inject(JobService);
   private appService = inject(ApplicationService); 
 
-  // --- BIẾN ĐIỀU KHIỂN ĐÓNG/MỞ UI ---
+  // --- UI CONTROLS ---
   isOffcanvasOpen = false;
   isLevelDropdownOpen = false;
   isModelDropdownOpen = false;
+  isLocationDropdownOpen = false;
 
-  // --- BIẾN LƯU TRỮ DỮ LIỆU LỌC ---
-  selectedLevels: string[] = [];
-  selectedModels: string[] = [];
+  // --- LOCATION DATA ---
+  provinces = [
+    { id: 1, name: 'Hà Nội' },
+    { id: 2, name: 'Hồ Chí Minh' },
+    { id: 3, name: 'Đà Nẵng' },
+    { id: 4, name: 'Bình Dương' },
+    { id: 5, name: 'Đồng Nai' }
+  ];
+
+  districtsMap: { [key: number]: string[] } = {
+    1: ['Ba Đình', 'Hoàn Kiếm', 'Tây Hồ', 'Long Biên', 'Cầu Giấy', 'Đống Đa', 'Hai Bà Trưng', 'Ba Vì', 'Thạch Thất', 'Sơn Tây'],
+    2: ['Quận 1', 'Quận 3', 'Quận 4', 'Quận 5', 'Quận 7', 'Quận 10', 'Bình Thạnh', 'Thủ Đức'],
+    3: ['Hải Châu', 'Thanh Khê', 'Sơn Trà', 'Ngũ Hành Sơn', 'Liên Chiểu', 'Cẩm Lệ'],
+    4: ['Thủ Dầu Một', 'Thuận An', 'Dĩ An', 'Bến Cát', 'Tân Uyên'],
+    5: ['Biên Hòa', 'Long Khánh', 'Nhơn Trạch', 'Trảng Bom']
+  };
+
+  selectedProvinceId: number | null = 1;
+  provinceSearchKeyword = '';
+  districtSearchKeyword = '';
+  tempSelectedLocations: string[] = [];
+
+  // --- FILTER STATE ---
+  sidebarLevels: string[] = [];
+  sidebarModels: string[] = [];
+  selectedSalary: number = 0; 
   
   jobs = signal<any[]>([]);
-  title = signal('Nguyễn Thành Nhân - TopIT');
-  selectedFile: File | null = null; 
+  allJobs: any[] = [];
   selectedJob = signal<any>(null);
 
   searchFilter = {
@@ -39,189 +62,155 @@ export class JobListComponent implements OnInit {
     this.onSearch();
   }
 
-  // 4. Cần thêm hàm này để bắt sự kiện chọn file từ HTML
-  onFileSelected(event: any) {
-    this.selectedFile = event.target.files[0];
-    console.log('File đã chọn:', this.selectedFile);
-  }
-
-  apply(jobId: number) {
-    const userId = 1; 
-    const message = "Em nộp đơn từ component mới!";
-
-    if (!this.selectedFile) {
-      alert("Nhân ơi, chọn CV trước khi nộp nhé!");
-      return;
-    }
-
-    this.appService.applyJob(jobId, userId, message, this.selectedFile).subscribe({
-      next: (res: any) => alert("Nộp thành công! " + res.message),
-      error: (err: any) => alert("Lỗi nộp đơn: " + (err.error?.message || err.message))
-    });
-  }
-
-    onSelectJob(job: any) {
+  onSelectJob(job: any) {
     this.selectedJob.set(job);
   }
 
   onSearch() {
     this.jobService.getJobs(this.searchFilter).subscribe({
       next: (data: any) => {
-        // CẬP NHẬT QUAN TRỌNG: Lưu dữ liệu lấy từ API vào mảng gốc
         this.allJobs = data; 
-        
         this.jobs.set(data);
         if (data && data.length > 0) {
-          this.selectedJob.set(data[0]); // Tự động chọn Job đầu tiên khi load
+          this.selectedJob.set(data[0]); 
         }
-        console.log('Dữ liệu đã về:', data);
       },
       error: (err) => console.error('Lỗi kết nối API:', err)
     });
   }
 
-    getDropdownText(type: string): string {
+  toggleDropdown(type: string) {
+    if (type === 'level') {
+      this.isLevelDropdownOpen = !this.isLevelDropdownOpen;
+      this.isModelDropdownOpen = false;
+      this.isLocationDropdownOpen = false;
+    } else if (type === 'model') {
+      this.isModelDropdownOpen = !this.isModelDropdownOpen;
+      this.isLevelDropdownOpen = false;
+      this.isLocationDropdownOpen = false;
+    } else if (type === 'location') {
+      this.isLocationDropdownOpen = !this.isLocationDropdownOpen;
+      this.isLevelDropdownOpen = false;
+      this.isModelDropdownOpen = false;
+      if (this.isLocationDropdownOpen) {
+        this.tempSelectedLocations = this.searchFilter.location ? this.searchFilter.location.split(', ') : [];
+      }
+    }
+  }
+
+  // --- LOCATION LOGIC ---
+  get filteredProvinces() {
+    return this.provinces.filter(p => p.name.toLowerCase().includes(this.provinceSearchKeyword.toLowerCase()));
+  }
+
+  get filteredDistricts() {
+    const districts = this.selectedProvinceId ? this.districtsMap[this.selectedProvinceId] || [] : [];
+    return districts.filter(d => d.toLowerCase().includes(this.districtSearchKeyword.toLowerCase()));
+  }
+
+  selectProvince(id: number) {
+    this.selectedProvinceId = id;
+    this.districtSearchKeyword = ''; // Reset tìm kiếm quận khi đổi tỉnh
+  }
+
+  toggleProvinceSelection(id: number, event: any) {
+    event.stopPropagation();
+    const province = this.provinces.find(p => p.id === id);
+    if (!province) return;
+
+    const districts = this.districtsMap[id] || [];
+    const allSelected = districts.every(d => this.tempSelectedLocations.includes(d));
+
+    if (allSelected) {
+      // Bỏ chọn tất cả quận thuộc tỉnh này
+      this.tempSelectedLocations = this.tempSelectedLocations.filter(loc => !districts.includes(loc));
+    } else {
+      // Chọn tất cả quận thuộc tỉnh này (không trùng lặp)
+      districts.forEach(d => {
+        if (!this.tempSelectedLocations.includes(d)) this.tempSelectedLocations.push(d);
+      });
+    }
+  }
+
+  isProvinceSelected(id: number): boolean {
+    const districts = this.districtsMap[id] || [];
+    return districts.length > 0 && districts.every(d => this.tempSelectedLocations.includes(d));
+  }
+
+  toggleLocationSelection(loc: string, event: any) {
+    event.stopPropagation();
+    const index = this.tempSelectedLocations.indexOf(loc);
+    if (index === -1) this.tempSelectedLocations.push(loc);
+    else this.tempSelectedLocations.splice(index, 1);
+  }
+
+  isLocationSelected(loc: string): boolean {
+    return this.tempSelectedLocations.includes(loc);
+  }
+
+  clearTempLocations() {
+    this.tempSelectedLocations = [];
+  }
+
+  applyLocationFilter() {
+    this.searchFilter.location = this.tempSelectedLocations.join(', ');
+    this.isLocationDropdownOpen = false;
+    this.onSearch();
+  }
+
+  // --- FILTER HELPERS ---
+  getDropdownText(type: string): string {
     const selectedList = type === 'level' ? this.sidebarLevels : this.sidebarModels;
     const defaultName = type === 'level' ? 'Cấp bậc' : 'Hình thức';
-
-    if (selectedList.length === 0) {
-      return defaultName; // Nếu chưa chọn gì thì hiện chữ mặc định
-    }
-    
-    if (selectedList.length === 1) {
-      return selectedList[0]; // Nếu chọn 1 cái thì hiện tên cái đó 
-    }
-
-    // Nếu chọn từ 2 cái trở lên: hiện cái đầu tiên kèm số lượng cộng thêm 
+    if (selectedList.length === 0) return defaultName;
+    if (selectedList.length === 1) return selectedList[0];
     return `${selectedList[0]} +${selectedList.length - 1}`;
   }
 
   toggleFilterMenu() {
-  this.isOffcanvasOpen = !this.isOffcanvasOpen;
-}
-
-
-
-// Hàm mở các Dropdown Checkbox
-toggleDropdown(type: string) {
-  if (type === 'level') {
-    this.isLevelDropdownOpen = !this.isLevelDropdownOpen;
-    this.isModelDropdownOpen = false; // Đóng cái kia lại
-  } else {
-    this.isModelDropdownOpen = !this.isModelDropdownOpen;
-    this.isLevelDropdownOpen = false;
-  }
-}
-
-// Hàm xử lý khi người dùng tích vào Checkbox
-onCheckboxChange(filterType: string, value: string, event: any) {
-  const isChecked = event.target.checked;
-  let targetArray = filterType === 'level' ? this.selectedLevels : this.selectedModels;
-
-  if (isChecked) {
-    targetArray.push(value);
-  } else {
-    const index = targetArray.indexOf(value);
-    if (index > -1) targetArray.splice(index, 1);
+    this.isOffcanvasOpen = !this.isOffcanvasOpen;
   }
 
-  
-
-
-  console.log('Đang lọc Level:', this.selectedLevels, 'Model:', this.selectedModels);
-
-  }
-
-    applyFilters() {
-    console.log('Đang tiến hành lọc dữ liệu...');
-
-    // Lấy dữ liệu từ mảng gốc để lọc (Lúc này allJobs đã có dữ liệu)
+  applyFilters() {
     let filtered = [...this.allJobs];
-
-    // Lọc theo Cấp bậc (Level) - Không phân biệt hoa/thường
     if (this.sidebarLevels.length > 0) {
-      filtered = filtered.filter(job => {
-        if (!job.level) return false; // Tránh lỗi nếu job.level null
-        return this.sidebarLevels.some(lvl => 
-          lvl.toLowerCase() === job.level.toLowerCase()
-        );
-      });
+      filtered = filtered.filter(job => job.level && this.sidebarLevels.some(lvl => lvl.toLowerCase() === job.level.toLowerCase()));
     }
-
-    // Lọc theo Hình thức làm việc (jobType) - Không phân biệt hoa/thường
     if (this.sidebarModels.length > 0) {
-      filtered = filtered.filter(job => {
-        if (!job.jobType) return false; // Tránh lỗi nếu job.jobType null
-        return this.sidebarModels.some(model => 
-          model.toLowerCase() === job.jobType.toLowerCase()
-        );
-      });
+      filtered = filtered.filter(job => job.jobType && this.sidebarModels.some(model => model.toLowerCase() === job.jobType.toLowerCase()));
     }
-
-    // Lọc theo Mức lương
     if (this.selectedSalary > 0) {
-      filtered = filtered.filter(job => 
-        job.salaryMax >= this.selectedSalary
-      );
+      filtered = filtered.filter(job => job.salaryMax >= this.selectedSalary);
     }
-
-    // Cập nhật lại Signal để giao diện thay đổi
     this.jobs.set(filtered);
-
-    // Tự động chọn Job đầu tiên trong danh sách mới
-    if (filtered.length > 0) {
-      this.selectedJob.set(filtered[0]);
-    } else {
-      this.selectedJob.set(null);
-    }
+    if (filtered.length > 0) this.selectedJob.set(filtered[0]);
+    else this.selectedJob.set(null);
   }
-
 
   resetFilters() {
-  this.sidebarLevels = [];
-  this.sidebarModels = [];
-  this.selectedSalary = 0;
-  
-  // Hiển thị lại toàn bộ danh sách
-  this.jobs.set(this.allJobs);
-  if (this.allJobs.length > 0) {
-    this.selectedJob.set(this.allJobs[0]);
+    this.sidebarLevels = [];
+    this.sidebarModels = [];
+    this.selectedSalary = 0;
+    this.jobs.set(this.allJobs);
+    if (this.allJobs.length > 0) this.selectedJob.set(this.allJobs[0]);
+    this.isLevelDropdownOpen = false;
+    this.isModelDropdownOpen = false;
   }
 
-  // Đóng các dropdown nếu đang mở
-  this.isLevelDropdownOpen = false;
-  this.isModelDropdownOpen = false;
-  
-  console.log('Đã xóa toàn bộ bộ lọc');
-}
-
-  // --- BIẾN CHO SIDEBAR FILTER ---
-  sidebarLevels: string[] = [];
-  sidebarModels: string[] = [];
-  selectedSalary: number = 0; 
-
-
-    togglePill(type: string, value: string) {
-    if (type === 'level') {
-      const index = this.sidebarLevels.indexOf(value);
-      if (index === -1) this.sidebarLevels.push(value);
-      else this.sidebarLevels.splice(index, 1);
-    } else if (type === 'model') {
-      const index = this.sidebarModels.indexOf(value);
-      if (index === -1) this.sidebarModels.push(value);
-      else this.sidebarModels.splice(index, 1);
-    }
-
-    // QUAN TRỌNG: Gọi hàm lọc ngay lập tức sau khi thay đổi mảng
+  togglePill(type: string, value: string) {
+    let targetArray = type === 'level' ? this.sidebarLevels : this.sidebarModels;
+    const index = targetArray.indexOf(value);
+    if (index === -1) targetArray.push(value);
+    else targetArray.splice(index, 1);
     this.applyFilters();
   }
 
-  
   isPillSelected(type: string, value: string): boolean {
     let targetArray = type === 'level' ? this.sidebarLevels : this.sidebarModels;
     return targetArray.includes(value);
   }
 
-  allJobs: any[] = [];
- 
+  // Phục vụ giao diện cũ/khác
+  onFileSelected(event: any) {}
+  apply(jobId: number) {}
 }

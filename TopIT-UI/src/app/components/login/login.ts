@@ -16,8 +16,8 @@ export class LoginComponent {
   private router = inject(Router);
 
   loginData = {
-    username: 'admin', 
-    password: 'password'
+    email: '', 
+    password: ''
   };
 
   onLogin() {
@@ -33,7 +33,11 @@ export class LoginComponent {
       },
       error: (err) => {
         console.error(err);
-        alert('Đăng nhập thất bại: ' + (err.error?.message || 'Có lỗi xảy ra'));
+        if (err.status === 0) {
+          alert('Lỗi kết nối API: Không thể kết nối tới máy chủ. Vui lòng kiểm tra lại backend nhé!');
+        } else {
+          alert('Đăng nhập thất bại: ' + (err.error?.message || 'Email hoặc mật khẩu không đúng'));
+        }
       }
   });
 }
