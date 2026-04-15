@@ -3,6 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { JobService } from '../../services/job'; 
 import { ApplicationService } from '../../services/application'; 
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth';
+import { NotificationService } from '../../services/notification';
+import { UserCvService, UserCV } from '../../services/user-cv.service';
 
 @Component({
   selector: 'app-job-list',
@@ -14,12 +18,23 @@ import { ApplicationService } from '../../services/application';
 export class JobListComponent implements OnInit {
   private jobService = inject(JobService);
   private appService = inject(ApplicationService); 
+  private authService = inject(AuthService);
+  private cvService = inject(UserCvService);
+  private router = inject(Router);
+  private notificationService = inject(NotificationService);
 
   // --- UI CONTROLS ---
   isOffcanvasOpen = false;
   isLevelDropdownOpen = false;
   isModelDropdownOpen = false;
   isLocationDropdownOpen = false;
+
+  // --- APPLY MODAL STATE ---
+  isApplySelectionModalOpen = false;
+  applyMessage = '';
+  applyingJobId: number | null = null;
+  userCVs = signal<UserCV[]>([]);
+  selectedCVForApply: UserCV | null = null;
 
   // --- LOCATION DATA ---
   provinces = [
@@ -75,7 +90,10 @@ export class JobListComponent implements OnInit {
           this.selectedJob.set(data[0]); 
         }
       },
-      error: (err) => console.error('Lỗi kết nối API:', err)
+      error: (err) => {
+        console.error('Lỗi kết nối API:', err);
+        this.notificationService.error('Không thể kết nối tới máy chủ. Vui lòng kiểm tra lại backend nhé!');
+      }
     });
   }
 
@@ -110,7 +128,7 @@ export class JobListComponent implements OnInit {
 
   selectProvince(id: number) {
     this.selectedProvinceId = id;
-    this.districtSearchKeyword = ''; // Reset tìm kiếm quận khi đổi tỉnh
+    this.districtSearchKeyword = ''; 
   }
 
   toggleProvinceSelection(id: number, event: any) {
@@ -122,10 +140,8 @@ export class JobListComponent implements OnInit {
     const allSelected = districts.every(d => this.tempSelectedLocations.includes(d));
 
     if (allSelected) {
-      // Bỏ chọn tất cả quận thuộc tỉnh này
       this.tempSelectedLocations = this.tempSelectedLocations.filter(loc => !districts.includes(loc));
     } else {
-      // Chọn tất cả quận thuộc tỉnh này (không trùng lặp)
       districts.forEach(d => {
         if (!this.tempSelectedLocations.includes(d)) this.tempSelectedLocations.push(d);
       });
@@ -210,7 +226,107 @@ export class JobListComponent implements OnInit {
     return targetArray.includes(value);
   }
 
-  // Phục vụ giao diện cũ/khác
-  onFileSelected(event: any) {}
-  apply(jobId: number) {}
+  apply(jobId: number) {
+    if (!this.authService.isAuthenticated()) {
+      const returnUrl = this.router.url; 
+      this.router.navigate(['/login'], { queryParams: { returnUrl } });
+      return;
+    }
+
+    this.applyingJobId = jobId;
+    const currentJob = this.jobs().find(j => j.id === jobId);
+    
+    // Kiểm tra danh sách CV của User
+    this.cvService.getCVs().subscribe({
+      next: (cvs) => {
+        this.userCVs.set(cvs);
+        if (cvs.length > 0) {
+          this.isApplySelectionModalOpen = true;
+
+          // Nếu là Cập nhật đơn cũ -> Cần lấy thông tin đơn cũ để auto-select
+          if (currentJob?.isApplied) {
+            // Gọi API lấy detail để có thông tin ExistingApplication (chứa CVPath và Message cũ)
+            this.jobService.getJobById(jobId).subscribe(jobDetail => {
+              const existing = jobDetail.existingApplication || jobDetail.ExistingApplication;
+              if (existing) {
+                const oldCvPath = existing.cvPath || existing.CVPath;
+                this.applyMessage = existing.message || existing.Message || '';
+                
+                const matchedCv = cvs.find(c => {
+                   const urlParts = c.fileUrl?.split('/') ?? [];
+                   return urlParts[urlParts.length - 1] === oldCvPath;
+                });
+                if (matchedCv) this.selectedCVForApply = matchedCv;
+                else this.selectedCVForApply = cvs.find(c => c.isDefault) || cvs[0];
+              }
+            });
+          } else {
+            this.selectedCVForApply = cvs.find(c => c.isDefault) || cvs[0];
+            this.applyMessage = '';
+          }
+        } else {
+          this.notificationService.info('Bạn chưa có bản CV nào trong hệ thống. Vui lòng tải lên CV trước khi ứng tuyển.', 'Thiếu CV');
+          this.router.navigate(['/my-cvs']);
+        }
+      },
+      error: () => this.notificationService.error('Có lỗi khi kiểm tra hồ sơ của bạn.')
+    });
+  }
+
+  onSelectCvToApply(cv: UserCV) {
+    this.selectedCVForApply = cv;
+  }
+
+  submitApplicationWithCV() {
+    if (!this.applyingJobId || !this.selectedCVForApply) return;
+
+    const userId = this.authService.getUserIdFromToken();
+    if (!userId) return;
+
+    const currentJob = this.jobs().find(j => j.id === this.applyingJobId);
+    const isUpdate = !!currentJob?.isApplied;
+
+    const urlParts = this.selectedCVForApply.fileUrl.split('/');
+    const cvPath = urlParts[urlParts.length - 1];
+
+    const applicationData = {
+      jobId: this.applyingJobId,
+      userId: userId,
+      cvPath: cvPath,
+      message: this.applyMessage
+    };
+
+    this.appService.applyWithExistingCV(applicationData).subscribe({
+      next: () => {
+        if (isUpdate) {
+            this.notificationService.success('Cập nhật hồ sơ ứng tuyển thành công!');
+        } else {
+            this.notificationService.success('Nộp đơn thành công cho công việc này!');
+            if (currentJob) currentJob.isApplied = true; 
+        }
+        this.isApplySelectionModalOpen = false;
+      },
+      error: (err) => {
+        this.notificationService.error('Lỗi khi nộp đơn: ' + (err.error?.message || 'Vui lòng thử lại.'));
+      }
+    });
+  }
+
+  toggleSaveJob(event: Event, job: any) {
+    event.stopPropagation(); // Không kích hoạt onSelectJob khi nhấn nút tim
+    
+    if (!this.authService.isAuthenticated()) {
+      this.notificationService.info('Vui lòng đăng nhập để lưu công việc này');
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    this.jobService.toggleSaveJob(job.id).subscribe({
+      next: (res) => {
+        job.isSaved = res.isSaved;
+        this.notificationService.success(res.message);
+      },
+      error: () => this.notificationService.error('Có lỗi xảy ra khi lưu công việc')
+    });
+  }
 }

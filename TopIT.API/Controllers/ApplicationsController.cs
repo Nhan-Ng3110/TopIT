@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 using TopIT.Core.Entities;
 using TopIT.Core.Interfaces;
@@ -23,6 +23,9 @@ namespace TopIT.API.Controllers
         {
             if (cvFile == null || cvFile.Length == 0)
                 return BadRequest("Vui lòng tải lên CV của bạn!");
+
+            if (await _AppRepo.HasUserAppliedAsync(userId, jobId))
+                return BadRequest("Bạn đã ứng tuyển công việc này rồi!");
 
             string uploadsFolder = Path.Combine(_env.ContentRootPath, "uploads", "cvs");
             if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
@@ -57,6 +60,86 @@ namespace TopIT.API.Controllers
                 cvUrl = fileUrl 
             });
             
+        }
+
+        [HttpPost("apply-existing-cv")]
+        public async Task<IActionResult> ApplyExistingCV([FromBody] ApplyWithCvDto dto)
+        {
+            var existingApp = await _AppRepo.GetByUserAndJobAsync(dto.UserId, dto.JobId);
+
+            if (existingApp != null)
+            {
+                // Cập nhật đơn cũ
+                existingApp.CVPath = dto.CVPath;
+                existingApp.Message = dto.Message;
+                existingApp.AppliedAt = DateTime.Now;
+                existingApp.Status = "Pending";
+
+                await _AppRepo.UpdateAsync(existingApp);
+                return Ok(new { message = "Cập nhật ứng tuyển thành công!" });
+            }
+
+            var newApp = new JobApplication
+            {
+                JobId = dto.JobId,
+                UserId = dto.UserId,
+                Message = dto.Message,
+                CVPath = dto.CVPath,
+                AppliedAt = DateTime.Now,
+                Status = "Pending"
+            };
+
+            await _AppRepo.AddAsync(newApp);
+
+            return Ok(new { message = "Ứng tuyển thành công!" });
+        }
+
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetByUser(int userId)
+        {
+            var applications = await _AppRepo.GetByUserIdAsync(userId);
+            
+            var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+
+            var result = applications.Select(a => new {
+                a.Id,
+                a.JobId,
+                JobTitle = a.Job?.Title,
+                CompanyName = a.Job?.Company?.Name,
+                CompanyLogo = a.Job?.Company?.LogoPath,
+                a.Message,
+                a.Status,
+                a.AppliedAt,
+                CvUrl = $"{baseUrl}/uploads/cvs/{a.CVPath}"
+            });
+
+            return Ok(result);
+        }
+
+        [HttpGet("my-applications")]
+        public async Task<IActionResult> GetMyApplications()
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized("Vui lòng đăng nhập");
+
+            int userId = int.Parse(userIdClaim);
+            var applications = await _AppRepo.GetByUserIdAsync(userId);
+            
+            var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+
+            var result = applications.Select(a => new {
+                a.Id,
+                a.JobId,
+                JobTitle = a.Job?.Title,
+                CompanyName = a.Job?.Company?.Name,
+                CompanyLogo = a.Job?.Company?.LogoPath,
+                a.Message,
+                a.Status,
+                a.AppliedAt,
+                CvUrl = $"{baseUrl}/uploads/cvs/{a.CVPath}"
+            });
+
+            return Ok(result);
         }
 
         [HttpGet("job/{jobId}")]
@@ -108,4 +191,11 @@ namespace TopIT.API.Controllers
         }
     }
 
+    public class ApplyWithCvDto
+    {
+        public int JobId { get; set; }
+        public int UserId { get; set; }
+        public string CVPath { get; set; }
+        public string? Message { get; set; }
+    }
 }

@@ -9,7 +9,42 @@
         <a routerLink="/jobs" class="nav-link active" style="cursor: pointer;">Tìm việc</a>
         <a href="#" class="nav-link">Công ty</a>
         
-        <a routerLink="/login" class="nav-link" style="cursor: pointer;">Đăng nhập</a>
+        <!-- Desktop Auth View -->
+        <ng-container *ngIf="!isLoggedIn; else userMenu">
+          <a routerLink="/login" class="nav-link" style="cursor: pointer;">Đăng nhập</a>
+        </ng-container>
+
+        <ng-template #userMenu>
+          <div class="user-profile-dropdown">
+            <div class="user-info d-flex align-items-center gap-2">
+              <span class="user-name">{{ userName }}</span>
+              <i class="bi bi-chevron-down"></i>
+            </div>
+            
+            <div class="dropdown-menu-premium">
+              <a routerLink="/dashboard" class="dropdown-item-premium">
+                <i class="bi bi-grid"></i>
+                <span>Quản lý việc làm</span>
+              </a>
+
+              <a routerLink="/cv-management" class="dropdown-item-premium">
+                <i class="bi bi-file-earmark-person"></i>
+                <span>Quản lý CV</span>
+              </a>
+
+              <a routerLink="/profile" class="dropdown-item-premium">
+                <i class="bi bi-person-circle"></i>
+                <span>Tài khoản</span>
+              </a>
+              
+              <div class="dropdown-divider"></div>
+              <a href="javascript:void(0)" (click)="logout()" class="dropdown-item-premium logout">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Đăng xuất</span>
+              </a>
+            </div>
+          </div>
+        </ng-template>
         
         <button class="btn-post-job">
           Đăng tuyển
@@ -21,11 +56,23 @@
       </button>
     </div>
 
+    <!-- Mobile Auth View -->
     <div class="mobile-menu d-md-none collapse" id="mobileMenu">
       <nav class="d-flex flex-column gap-3 py-3 px-4 bg-white">
         <a routerLink="/jobs" class="nav-link active fs-5">Tìm việc</a>
         <a href="#" class="nav-link fs-5">Công ty</a>
-        <a routerLink="/login" class="nav-link fs-5">Đăng nhập</a>
+        
+        <ng-container *ngIf="!isLoggedIn; else mobileUserMenu">
+          <a routerLink="/login" class="nav-link fs-5">Đăng nhập</a>
+        </ng-container>
+
+        <ng-template #mobileUserMenu>
+          <a routerLink="/dashboard" class="nav-link fs-5">Quản lý việc làm</a>
+          <a routerLink="/cv-management" class="nav-link fs-5">Quản lý CV</a>
+          <a routerLink="/profile" class="nav-link fs-5">Trang cá nhân ({{ userName }})</a>
+          <a href="javascript:void(0)" (click)="logout()" class="nav-link fs-5 text-danger">Đăng xuất</a>
+        </ng-template>
+
         <button class="btn-post-job w-100">
           Đăng tuyển
         </button>
@@ -48,3 +95,5 @@
     </div>
   </div>
 </footer>
+
+<app-notification-toast></app-notification-toast>

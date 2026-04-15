@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -72,6 +72,73 @@ namespace TopIT.Infrastructure.Repositories
             return await _context.Jobs.ToListAsync();
         }
 
+        // --- Saved Jobs Implementation ---
 
+        public async Task<bool> ToggleSaveJobAsync(int userId, int jobId)
+        {
+            var existing = await _context.SavedJobs
+                .FirstOrDefaultAsync(s => s.UserId == userId && s.JobId == jobId);
+
+            if (existing != null)
+            {
+                _context.SavedJobs.Remove(existing);
+                await _context.SaveChangesAsync();
+                return false; // Result is NOT saved
+            }
+            else
+            {
+                var newSaved = new SavedJob { UserId = userId, JobId = jobId, SavedAt = DateTime.Now };
+                await _context.SavedJobs.AddAsync(newSaved);
+                await _context.SaveChangesAsync();
+                return true; // Result is saved
+            }
+        }
+
+        public async Task<IEnumerable<SavedJob>> GetSavedJobsAsync(int userId)
+        {
+            return await _context.SavedJobs
+                .Include(s => s.Job)
+                    .ThenInclude(j => j.Company)
+                .Where(s => s.UserId == userId)
+                .OrderByDescending(s => s.SavedAt)
+                .ToListAsync();
+        }
+
+        public async Task<bool> IsJobSavedAsync(int userId, int jobId)
+        {
+            return await _context.SavedJobs.AnyAsync(s => s.UserId == userId && s.JobId == jobId);
+        }
+
+        // --- Viewed Jobs Implementation ---
+
+        public async Task TrackViewJobAsync(int userId, int jobId)
+        {
+            var existing = await _context.ViewedJobs
+                .FirstOrDefaultAsync(v => v.UserId == userId && v.JobId == jobId);
+
+            if (existing != null)
+            {
+                existing.ViewedAt = DateTime.Now;
+                _context.ViewedJobs.Update(existing);
+            }
+            else
+            {
+                var newView = new ViewedJob { UserId = userId, JobId = jobId, ViewedAt = DateTime.Now };
+                await _context.ViewedJobs.AddAsync(newView);
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<ViewedJob>> GetViewedJobsAsync(int userId)
+        {
+            return await _context.ViewedJobs
+                .Include(v => v.Job)
+                    .ThenInclude(j => j.Company)
+                .Where(v => v.UserId == userId)
+                .OrderByDescending(v => v.ViewedAt)
+                .Take(20) // Limit to 20 as requested
+                .ToListAsync();
+        }
     }
 }

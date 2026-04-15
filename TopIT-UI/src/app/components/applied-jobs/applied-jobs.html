@@ -1,0 +1,48 @@
+<div class="applied-jobs-container">
+  <div class="page-header">
+    <h1 class="page-title">Việc làm <span class="text-gradient">Đã ứng tuyển</span></h1>
+    <p class="page-subtitle">Theo dõi trạng thái các đơn ứng tuyển của bạn</p>
+  </div>
+
+  <div class="loading-spinner" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Đang tải dữ liệu...</p>
+  </div>
+
+  <div class="no-data card-premium" *ngIf="!loading && applications.length === 0">
+    <div class="no-data-icon">💼</div>
+    <h3>Bạn chưa ứng tuyển công việc nào</h3>
+    <p>Hãy khám phá các cơ hội việc làm hấp dẫn ngay hôm nay!</p>
+    <button class="btn-explore hover-glow" routerLink="/jobs">Khám phá việc làm</button>
+  </div>
+
+  <div class="applications-grid" *ngIf="!loading && applications.length > 0">
+    <div class="application-card card-premium" *ngFor="let app of applications">
+      <div class="card-header">
+        <div class="company-logo">
+          <img [src]="app.companyLogo || 'assets/default-company.png'" [alt]="app.companyName">
+        </div>
+        <div class="application-meta">
+          <span class="applied-date">Ngày nộp: {{ app.appliedAt | date:'dd/MM/yyyy' }}</span>
+          <div class="status-badge" [ngClass]="getStatusClass(app.status)">
+            {{ getStatusText(app.status) }}
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <h3 class="job-title">{{ app.jobTitle }}</h3>
+        <p class="company-name text-gradient">{{ app.companyName }}</p>
+      </div>
+
+      <div class="card-footer">
+        <a [routerLink]="['/job', app.jobId]" class="btn-view-detail">
+          Xem chi tiết <i class="fas fa-arrow-right"></i>
+        </a>
+        <a [href]="app.cvUrl" target="_blank" class="btn-view-cv">
+          <i class="fas fa-file-pdf"></i> Xem CV đã nộp
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

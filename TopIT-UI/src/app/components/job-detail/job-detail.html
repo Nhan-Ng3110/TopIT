@@ -1,0 +1,143 @@
+<div class="job-detail-container" *ngIf="job">
+  <!-- Header Phần header công việc -->
+  <div class="job-header card-premium">
+    <div class="header-main">
+      <div class="company-logo">
+        <img [src]="job.company?.logoPath || 'assets/default-company.png'" [alt]="job.company?.name">
+      </div>
+      <div class="job-info">
+        <h1 class="job-title">{{ job.title }}</h1>
+        <p class="company-name text-gradient">{{ job.company?.name }}</p>
+        <div class="job-meta">
+          <span><i class="fas fa-map-marker-alt"></i> {{ job.location }}</span>
+          <span><i class="fas fa-briefcase"></i> {{ job.jobType }}</span>
+          <span><i class="fas fa-clock"></i> {{ job.createdAt | date:'dd/MM/yyyy' }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="header-action">
+      <div class="salary-box">
+        <span class="label">Mức lương</span>
+        <span class="value" *ngIf="!job.isNegotiable">{{ job.salaryMin | number }} - {{ job.salaryMax | number }} VND</span>
+        <span class="value" *ngIf="job.isNegotiable">Thỏa thuận</span>
+      </div>
+
+      <!-- Banner thông báo đã ứng tuyển -->
+      <div class="applied-banner" *ngIf="job.isApplied">
+        <i class="fas fa-circle-check"></i>
+        <span>Bạn đã nộp đơn cho vị trí này. Bạn có thể nhấn nút dưới đây để cập nhật hồ sơ mới nhất.</span>
+      </div>
+
+      <button class="btn-apply hover-glow" 
+              [class.applied]="job.isApplied"
+              (click)="onApplyNow()">
+        <i class="fas" [ngClass]="job.isApplied ? 'fa-pen-to-square' : 'fa-paper-plane'"></i>
+        {{ job.isApplied ? 'Cập nhật ứng tuyển' : 'Ứng tuyển ngay' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="job-content-grid">
+    <!-- Cột trái: Nội dung chính -->
+    <div class="main-content">
+      <section class="content-section card-premium">
+        <h3><i class="fas fa-align-left"></i> Mô tả công việc</h3>
+        <div class="content-text">{{ job.description }}</div>
+      </section>
+
+      <section class="content-section card-premium" *ngIf="job.requirements">
+        <h3><i class="fas fa-list-check"></i> Yêu cầu công việc</h3>
+        <div class="content-text">{{ job.requirements }}</div>
+      </section>
+
+      <section class="content-section card-premium" *ngIf="job.benefits">
+        <h3><i class="fas fa-gift"></i> Quyền lợi</h3>
+        <div class="content-text">{{ job.benefits }}</div>
+      </section>
+    </div>
+
+    <!-- Cột phải: Thông tin thêm -->
+    <div class="sidebar-content">
+      <div class="info-card card-premium">
+        <h3>Thông tin chi tiết</h3>
+        <div class="info-item">
+          <span class="label">Cấp bậc</span>
+          <span class="value">{{ job.level }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Kinh nghiệm</span>
+          <span class="value">{{ job.experienceYears }} năm</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Hình thức làm việc</span>
+          <span class="value">{{ job.jobType }}</span>
+        </div>
+      </div>
+
+      <div class="company-card card-premium">
+        <h3>Về công ty</h3>
+        <p class="company-desc">{{ job.company?.description }}</p>
+        <div class="company-stats">
+          <div class="stat">
+            <span class="label">Quy mô</span>
+            <span class="value">{{ job.company?.size || 'N/A' }} nhân viên</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Ứng tuyển -->
+  <div class="apply-modal-backdrop" *ngIf="showApplyModal" (click)="closeModal()">
+    <div class="apply-modal card-premium" (click)="$event.stopPropagation()" [class.slide-in]="showApplyModal">
+      <div class="modal-header">
+        <h2>{{ job.isApplied ? 'Cập nhật ứng tuyển' : 'Ứng tuyển vị trí' }} <span class="text-gradient">{{ job.title }}</span></h2>
+        <button class="btn-close" (click)="closeModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <!-- Info banner khi đang cập nhật đơn cũ -->
+        <div class="modal-info-banner" *ngIf="job.isApplied">
+          <i class="fas fa-circle-info"></i>
+          <span>Hệ thống đã ghi nhận đơn ứng tuyển cũ của bạn. Bạn có thể chỉnh sửa và lưu lại.</span>
+        </div>
+
+        <div class="cv-selection" *ngIf="userCvs.length > 0">
+          <p class="help-text">{{ job.isApplied ? 'CV được chọn lần trước đã được tự động tích. Bạn có thể đổi sang CV khác:' : 'Vui lòng chọn 1 CV của bạn để ứng tuyển:' }}</p>
+          <div class="cv-list">
+            <div class="cv-item card-premium" 
+                 *ngFor="let cv of userCvs" 
+                 [class.selected]="selectedCvId === cv.id"
+                 (click)="selectCv(cv)">
+              <div class="cv-info">
+                <span class="cv-name">{{ cv.fileName }}</span>
+                <span class="cv-date">Cập nhật: {{ cv.uploadDate | date:'dd/MM/yyyy' }}</span>
+              </div>
+              <div class="check-mark" *ngIf="selectedCvId === cv.id">
+                <i class="fas fa-check-circle"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="message-area">
+            <label for="message">Lời nhắn cho nhà tuyển dụng (không bắt buộc):</label>
+            <textarea id="message" [(ngModel)]="applyMessage" placeholder="Giới thiệu ngắn gọn về bản thân..."></textarea>
+          </div>
+        </div>
+
+        <div class="no-cv" *ngIf="userCvs.length === 0">
+          <div class="no-cv-icon">📄</div>
+          <p>Bạn chưa có bản CV nào trên hệ thống.</p>
+          <button class="btn-manage-cv hover-glow" routerLink="/my-cvs">Quản lý CV ngay</button>
+        </div>
+      </div>
+
+      <div class="modal-footer" *ngIf="userCvs.length > 0">
+        <button class="btn-cancel" (click)="closeModal()">Hủy</button>
+        <button class="btn-submit hover-glow" [disabled]="!selectedCvId" (click)="submitApplication()">
+          {{ job.isApplied ? 'Lưu thay đổi' : 'Xác nhận ứng tuyển' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

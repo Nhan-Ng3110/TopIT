@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,5 +18,9 @@ namespace TopIT.Infrastructure.Data
         public DbSet<JobApplication> JobApplications { get; set; }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<UserCV> UserCVs { get; set; }
+        public DbSet<SavedJob> SavedJobs { get; set; }
+        public DbSet<ViewedJob> ViewedJobs { get; set; }
     }
 }
+

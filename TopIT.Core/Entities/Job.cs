@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -38,6 +38,9 @@ namespace TopIT.Core.Entities
         //Theo tên công ty
         public int CompanyId { get; set; } //Id Công ty đang tuyển
         public Company? Company { get; set; }
+
+        public string? Requirements { get; set; } // Yêu cầu công việc
+        public string? Benefits { get; set; } // Quyền lợi
 
     }
 }

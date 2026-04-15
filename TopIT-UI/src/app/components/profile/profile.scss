@@ -1,0 +1,81 @@
+.profile-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 100px);
+    padding: 2rem;
+    // background-color: var(--bg-secondary); // Body already has this
+}
+
+.profile-card {
+    width: 100%;
+    max-width: 480px;
+    padding: 3rem 2rem;
+    text-align: center;
+    background: white; // Explicitly set as per request
+
+    h2 {
+        font-size: 2.25rem;
+        margin-bottom: 2.5rem;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+    }
+}
+
+.info-content {
+    margin-bottom: 3rem;
+    text-align: left;
+}
+
+.info-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--border-color);
+
+    &:last-of-type {
+        border-bottom: none;
+    }
+
+    .label {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+    }
+
+    .value {
+        font-size: 1.125rem;
+        color: var(--text-main);
+        font-weight: 600;
+    }
+
+    .role-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: rgba(37, 99, 235, 0.1);
+        color: var(--primary-color);
+        border-radius: 9999px;
+        font-size: 0.875rem;
+    }
+}
+
+.btn-logout {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 12px;
+    background-color: #fee2e2; // Đỏ nhạt (Red 100)
+    color: #ef4444; // Red 500
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &.hover-glow:hover {
+        background-color: #fecaca; // Red 200
+        box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2); // Override glow to red
+    }
+}

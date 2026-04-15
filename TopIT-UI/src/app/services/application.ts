@@ -25,4 +25,19 @@ export class ApplicationService {
   getApplicationsByJob(jobId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/job/${jobId}`);
   }
+
+  // 3. Nộp CV từ danh sách CV hiện có
+  applyWithExistingCV(data: { jobId: number, userId: number, cvPath: string, message?: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/apply-existing-cv`, data);
+  }
+
+  // 4. Lấy danh sách việc làm đã ứng tuyển của User
+  getApplicationsByUser(userId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/user/${userId}`);
+  }
+
+  // 5. Lấy danh sách việc làm đã ứng tuyển của User hiện tại (từ Token)
+  getMyApplications(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/my-applications`);
+  }
 }

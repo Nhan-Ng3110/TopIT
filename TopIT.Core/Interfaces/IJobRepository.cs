@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +15,14 @@ namespace TopIT.Core.Interfaces
         Task AddAsync(Job job);
 
         Task<IEnumerable<Job>> GetAllAsync();
+        
+        // Saved Jobs
+        Task<bool> ToggleSaveJobAsync(int userId, int jobId);
+        Task<IEnumerable<SavedJob>> GetSavedJobsAsync(int userId);
+        Task<bool> IsJobSavedAsync(int userId, int jobId);
 
-
+        // Viewed Jobs
+        Task TrackViewJobAsync(int userId, int jobId);
+        Task<IEnumerable<ViewedJob>> GetViewedJobsAsync(int userId);
     }
 }

@@ -140,6 +140,11 @@
          <div class="job-list-col">
           @for (job of jobs(); track job.id) {
             <div class="job-card-light" [class.active]="selectedJob()?.id === job.id" (click)="onSelectJob(job)">
+              <!-- Nút Lưu (Heart) -->
+              <button class="btn-save-job" [class.is-saved]="job.isSaved" (click)="toggleSaveJob($event, job)">
+                <i class="bi" [ngClass]="job.isSaved ? 'bi-heart-fill' : 'bi-heart'"></i>
+              </button>
+
               <div class="d-flex gap-3 text-start">
                 <div class="logo-box flex-shrink-0"><i class="bi bi-buildings"></i></div>
                 <div class="flex-grow-1 w-100 overflow-hidden text-start">
@@ -174,6 +179,21 @@
               <div class="detail-body">
                 <h5>Mô tả công việc</h5>
                 <p class="description-text">{{ detail.description }}</p>
+                
+                <div class="mt-5 pt-4 border-top">
+                  <!-- Banner thông báo đã ứng tuyển -->
+                  <div class="applied-banner mb-3" *ngIf="detail.isApplied">
+                    <i class="bi bi-patch-check-fill me-2"></i>
+                    <span>Bạn đã nộp đơn cho vị trí này. Bạn có thể nhấn nút dưới đây để cập nhật hồ sơ mới nhất.</span>
+                  </div>
+
+                  <button class="btn btn-primary px-5 py-3 fw-bold rounded-pill hover-glow w-100 w-md-auto" 
+                          [class.btn-success]="detail.isApplied"
+                          (click)="apply(detail.id)">
+                    <i class="bi" [ngClass]="detail.isApplied ? 'bi-pencil-square' : 'bi-send-fill'"></i>
+                    {{ detail.isApplied ? ' Cập nhật ứng tuyển' : ' Ứng tuyển ngay' }}
+                  </button>
+                </div>
               </div>
             </div>
           }
@@ -229,4 +249,64 @@
 
   <!-- Backdrop -->
   <div class="offcanvas-backdrop" *ngIf="isOffcanvasOpen" (click)="toggleFilterMenu()"></div>
+
+  <!-- Premium CV Selection Modal (Apply with stored CV) -->
+  <div class="apply-modal-overlay" *ngIf="isApplySelectionModalOpen">
+    <div class="card-premium apply-modal-card animate-slide-up">
+      <div class="modal-header-premium border-bottom pb-3 mb-4 d-flex justify-content-between align-items-center">
+        <h4 class="m-0 fw-bold text-gradient">Chọn CV ứng tuyển</h4>
+        <button class="btn btn-link text-muted p-0 fs-4" (click)="isApplySelectionModalOpen = false">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="modal-body-premium text-start">
+        <!-- Info banner khi đang cập nhật đơn cũ -->
+        <div class="modal-info-banner mb-3" *ngIf="jobs().find(j => j.id === applyingJobId)?.isApplied">
+          <i class="bi bi-info-circle-fill me-2"></i>
+          <span>Hệ thống đã ghi nhận đơn ứng tuyển cũ của bạn. Bạn có thể chỉnh sửa và lưu lại.</span>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-bold text-muted small text-uppercase mb-3">Chọn bản CV bạn muốn dùng</label>
+          <div class="cv-selection-list d-flex flex-column gap-2 max-height-300 overflow-auto pr-2">
+            @for (cv of userCVs(); track cv.id) {
+              <div class="cv-selection-item p-3 border rounded-4 d-flex align-items-center justify-content-between cursor-pointer transition-all"
+                   [class.is-selected]="selectedCVForApply?.id === cv.id"
+                   (click)="onSelectCvToApply(cv)">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" [checked]="selectedCVForApply?.id === cv.id">
+                  </div>
+                  <div>
+                    <div class="fw-bold text-main small">{{ cv.fileName }}</div>
+                    <div class="text-muted smallest">{{ cv.uploadDate | date:'dd/MM/yyyy' }}</div>
+                  </div>
+                </div>
+                @if (cv.isDefault) {
+                  <span class="badge bg-primary-soft text-primary rounded-pill smallest">Mặc định</span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="mb-0">
+          <label class="form-label fw-bold text-muted small text-uppercase mb-2">Lời nhắn (Tùy chọn)</label>
+          <textarea class="form-control premium-textarea" rows="3" 
+                    placeholder="Giới thiệu thêm về bản thân..." 
+                    [(ngModel)]="applyMessage"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer-premium d-flex gap-3 mt-4 pt-4 border-top">
+        <button class="btn btn-outline-secondary flex-grow-1 rounded-pill py-3 fw-bold" (click)="isApplySelectionModalOpen = false">Hủy</button>
+        <button class="btn btn-primary flex-grow-1 rounded-pill py-3 fw-bold hover-glow" 
+                [class.btn-success]="jobs().find(j => j.id === applyingJobId)?.isApplied"
+                (click)="submitApplicationWithCV()">
+          {{ jobs().find(j => j.id === applyingJobId)?.isApplied ? 'Lưu thay đổi' : 'Nộp đơn ngay' }}
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

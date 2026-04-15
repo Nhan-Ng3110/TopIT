@@ -1,0 +1,139 @@
+<div class="dashboard-container">
+  <!-- Sidebar (Giữ nguyên menu điều hướng chính) -->
+  <aside class="dashboard-sidebar">
+    <div class="sidebar-brand">
+      <span class="text-gradient fw-bold fs-4">TopIT</span> Dashboard
+    </div>
+    <nav class="sidebar-nav">
+      <a routerLink="/jobs" class="nav-item">
+        <i class="bi bi-house-door"></i> Trang chủ
+      </a>
+      <a routerLink="/dashboard" class="nav-item active">
+        <i class="bi bi-grid"></i> Quản lý việc làm
+      </a>
+      <a routerLink="/cv-management" class="nav-item">
+        <i class="bi bi-file-earmark-person"></i> Quản lý CV
+      </a>
+      <a routerLink="/profile" class="nav-item">
+        <i class="bi bi-person-circle"></i> Hồ sơ cá nhân
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="dashboard-main">
+    <header class="dashboard-header">
+      <h1 class="page-title">Quản lý <span class="text-gradient">việc làm</span></h1>
+      <p class="text-muted">Theo dõi và quản lý các công việc bạn quan tâm</p>
+    </header>
+
+    <!-- Horizontal Tab Bar -->
+    <div class="tab-wrapper mb-4">
+      <nav class="premium-tabs">
+        <button class="tab-item" [class.active]="activeTab() === 'applied'" (click)="setTab('applied')">
+          <i class="bi bi-send-fill me-2"></i> Đã ứng tuyển
+        </button>
+        <button class="tab-item" [class.active]="activeTab() === 'saved'" (click)="setTab('saved')">
+          <i class="bi bi-heart-fill me-2"></i> Đã lưu
+        </button>
+        <button class="tab-item" [class.active]="activeTab() === 'viewed'" (click)="setTab('viewed')">
+          <i class="bi bi-clock-history me-2"></i> Vừa xem
+        </button>
+      </nav>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content-area">
+      <div class="loading-overlay" *ngIf="loading()">
+        <div class="spinner-border text-primary" role="status"></div>
+      </div>
+
+      <!-- Logic hiển thị từng Tab -->
+      <ng-container [ngSwitch]="activeTab()">
+        
+        <!-- Tab 1: Đã ứng tuyển -->
+        <div *ngSwitchCase="'applied'">
+          <div class="jobs-grid" *ngIf="appliedJobs().length > 0">
+            <div class="job-card-premium hover-glow" *ngFor="let app of appliedJobs()">
+              <div class="card-header">
+                <div class="brand-box">
+                  <img [src]="app.companyLogo || 'https://via.placeholder.com/50'" alt="Logo">
+                </div>
+                <span class="badge-status" [ngClass]="getStatusClass(app.status)">
+                  {{ getStatusText(app.status) }}
+                </span>
+              </div>
+              <div class="card-body">
+                <h3 class="job-title">{{ app.jobTitle }}</h3>
+                <p class="company-name text-gradient">{{ app.companyName }}</p>
+                <div class="meta-info">
+                  <span><i class="bi bi-calendar-check-fill me-1"></i> {{ app.appliedAt | date:'dd/MM/yyyy' }}</span>
+                </div>
+              </div>
+              <div class="card-footer">
+                <a [routerLink]="['/job', app.jobId]" class="btn-detail">Xem chi tiết <i class="bi bi-arrow-right"></i></a>
+              </div>
+            </div>
+          </div>
+          <ng-container *ngTemplateOutlet="emptyState; context: { $implicit: appliedJobs().length === 0 }"></ng-container>
+        </div>
+
+        <!-- Tab 2: Đã lưu -->
+        <div *ngSwitchCase="'saved'">
+          <div class="jobs-list" *ngIf="savedJobs().length > 0">
+            <div class="list-item-premium hover-glow" *ngFor="let item of savedJobs()">
+              <div class="d-flex align-items-center gap-4 w-100">
+                <div class="brand-box-small">
+                  <img [src]="item.job.company?.logoPath || 'https://via.placeholder.com/40'" alt="Logo">
+                </div>
+                <div class="flex-grow-1">
+                  <h4 class="job-title-small">{{ item.job.title }}</h4>
+                  <p class="company-name-small">{{ item.job.company?.name }}</p>
+                </div>
+                <div class="action-group d-flex gap-2">
+                  <button class="btn btn-sm btn-outline-danger rounded-pill" (click)="toggleSave(item.job.id)">
+                    <i class="bi bi-heart-fill"></i> Bỏ lưu
+                  </button>
+                  <a [routerLink]="['/job', item.job.id]" class="btn btn-sm btn-primary rounded-pill px-3">Ứng tuyển</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <ng-container *ngTemplateOutlet="emptyState; context: { $implicit: savedJobs().length === 0 }"></ng-container>
+        </div>
+
+        <!-- Tab 3: Vừa xem -->
+        <div *ngSwitchCase="'viewed'">
+          <div class="jobs-list" *ngIf="viewedJobs().length > 0">
+            <div class="list-item-premium hover-glow" *ngFor="let item of viewedJobs()">
+              <div class="d-flex align-items-center gap-4 w-100">
+                <div class="brand-box-small">
+                  <img [src]="item.job.company?.logoPath || 'https://via.placeholder.com/40'" alt="Logo">
+                </div>
+                <div class="flex-grow-1">
+                  <h4 class="job-title-small">{{ item.job.title }}</h4>
+                  <span class="time-ago"><i class="bi bi-clock me-1"></i> {{ getTimeAgo(item.viewedAt) }}</span>
+                </div>
+                <a [routerLink]="['/job', item.job.id]" class="btn btn-view">Xem lại</a>
+              </div>
+            </div>
+          </div>
+          <ng-container *ngTemplateOutlet="emptyState; context: { $implicit: viewedJobs().length === 0 }"></ng-container>
+        </div>
+
+      </ng-container>
+    </div>
+  </main>
+</div>
+
+<!-- Template cho Empty State -->
+<ng-template #emptyState let-isEmpty>
+  <div class="empty-state card-premium shadow-sm text-center py-5" *ngIf="isEmpty && !loading()">
+    <div class="empty-icon mb-4">
+      <i class="bi bi-inbox fs-1 text-muted opacity-25"></i>
+    </div>
+    <h3 class="fw-bold text-muted">Danh sách này đang đợi bạn lấp đầy đấy!</h3>
+    <p class="text-secondary mb-4">Khám phá hàng ngàn cơ hội việc làm hấp dẫn ngay hôm nay.</p>
+    <a routerLink="/jobs" class="btn btn-primary rounded-pill px-5 py-2 fw-bold hover-glow">Khám phá ngay</a>
+  </div>
+</ng-template>

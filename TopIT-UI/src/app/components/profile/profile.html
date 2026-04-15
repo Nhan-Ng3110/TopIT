@@ -1,0 +1,26 @@
+<div class="profile-container">
+    <div class="card-premium profile-card">
+        <h2 class="text-gradient">Thông tin cá nhân</h2>
+
+        <div class="info-content">
+            <div class="info-row">
+                <span class="label">Họ tên:</span>
+                <span class="value">{{ userProfile.fullName }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Email:</span>
+                <span class="value">{{ userProfile.email }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Vai trò:</span>
+                <span class="value">
+                    <span class="role-badge">{{ userProfile.role }}</span>
+                </span>
+            </div>
+        </div>
+
+        <button class="btn-logout hover-glow" (click)="logout()">
+            Đăng xuất
+        </button>
+    </div>
+</div>

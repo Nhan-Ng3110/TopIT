@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,7 +30,12 @@ namespace TopIT.Infrastructure.Repositories
         }
         public async Task<IEnumerable<JobApplication>> GetByUserIdAsync(int UserId)
         {
-            return await _context.JobApplications.Where(j => j.UserId == UserId).Include(j=> j.User).ToListAsync();
+            return await _context.JobApplications
+                .Where(j => j.UserId == UserId)
+                .Include(j => j.Job)
+                    .ThenInclude(j => j.Company)
+                .OrderByDescending(j => j.AppliedAt)
+                .ToListAsync();
         }
 
         public async Task<bool> UpdateStatusAsync(int ApplicationId, string NewStatus)
@@ -54,7 +59,21 @@ namespace TopIT.Infrastructure.Repositories
             }    
         }
 
+        public async Task<bool> HasUserAppliedAsync(int userId, int jobId)
+        {
+            return await _context.JobApplications.AnyAsync(a => a.UserId == userId && a.JobId == jobId);
+        }
 
+        public async Task<JobApplication?> GetByUserAndJobAsync(int userId, int jobId)
+        {
+            return await _context.JobApplications
+                .FirstOrDefaultAsync(a => a.UserId == userId && a.JobId == jobId);
+        }
 
+        public async Task UpdateAsync(JobApplication application)
+        {
+            _context.JobApplications.Update(application);
+            await _context.SaveChangesAsync();
+        }
     }
 }

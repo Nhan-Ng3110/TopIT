@@ -1,0 +1,217 @@
+<div class="cv-management-container">
+  <div class="dashboard-wrapper container py-5">
+    <div class="row g-4">
+      <!-- SIDEBAR -->
+      <aside class="col-lg-3">
+        <div class="card-premium sidebar-card p-4 text-center">
+          <div class="avatar-wrapper mb-3">
+            <div class="avatar-circle">
+              <i class="bi bi-person-fill fs-1"></i>
+              <div class="progress-ring" [style.--p]="completeness"></div>
+            </div>
+            <span class="completeness-badge">{{ completeness }}%</span>
+          </div>
+          <h5 class="fw-bold text-main mb-1">{{ userName }}</h5>
+          <p class="text-muted small mb-4">{{ userName }}</p>
+          
+          <div class="status-toggle d-flex align-items-center justify-content-between p-3 bg-light rounded-3 mb-2">
+            <span class="small fw-bold text-muted">Sẵn sàng làm việc</span>
+            <div class="form-check form-switch ms-2">
+              <input class="form-check-input" type="checkbox" checked>
+            </div>
+          </div>
+          <p class="text-muted smallest text-start lh-sm mt-2">Bật để kết nối nhanh hơn với nhà tuyển dụng.</p>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <div class="col-lg-9">
+        <!-- TOP TABS -->
+        <div class="nav-tabs-premium mb-4">
+          <a class="tab-item" routerLink="/jobs">Tìm việc làm</a>
+          <a class="tab-item" routerLink="/dashboard">Quản lý việc làm</a>
+          <a class="tab-item active" routerLink="/cv-management">Quản lý CV</a>
+          <a class="tab-item">Quản lý Email</a>
+          <a class="tab-item">Trắc nghiệm tính cách</a>
+        </div>
+
+        <div class="sub-tabs mb-4">
+          <button class="sub-tab-item" [class.active]="activeSubTab() === 'cvs'" (click)="setSubTab('cvs')">Danh sách hồ sơ</button>
+          <button class="sub-tab-item" [class.active]="activeSubTab() === 'applied'" (click)="setSubTab('applied')">Việc làm đã ứng tuyển</button>
+          <button class="sub-tab-item" [class.active]="activeSubTab() === 'saved'" (click)="setSubTab('saved')">Việc làm đã lưu</button>
+          <button class="sub-tab-item" [class.active]="activeSubTab() === 'viewed'" (click)="setSubTab('viewed')">Việc làm đã xem</button>
+        </div>
+
+        <!-- MAIN CONTENT AREA -->
+        <div class="card-premium main-content-card p-4 p-md-5 position-relative">
+          <!-- Loading Overlay -->
+          <div class="loading-overlay" *ngIf="loading()">
+            <div class="spinner-border text-primary" role="status"></div>
+          </div>
+
+          <!-- LỰA CHỌN NỘI DUNG THEO TAB -->
+          <ng-container [ngSwitch]="activeSubTab()">
+            
+            <!-- TAB: DANH SÁCH CV -->
+            <div *ngSwitchCase="'cvs'">
+              <h4 class="fw-bold text-gradient mb-3">Chọn CV chính để hiển thị với nhà tuyển dụng</h4>
+              <p class="text-muted mb-4">Hãy chọn bản CV hoàn thiện nhất để tối ưu cơ hội nghề nghiệp của bạn.</p>
+
+              <div class="cv-list-wrapper mb-4">
+                <label class="form-label fw-bold text-muted small text-uppercase mb-3">Danh sách CV hiện có ({{ cvs().length }}/5)</label>
+                
+                @if (cvs().length === 0) {
+                  <div class="empty-cv-state p-5 text-center border rounded-4 bg-light">
+                    <i class="bi bi-file-earmark-x fs-1 text-muted mb-3 d-block"></i>
+                    <p class="text-muted mb-0">Bạn chưa có bản CV nào. Hãy tải lên ngay!</p>
+                  </div>
+                } @else {
+                  <div class="cv-items-stack d-flex flex-column gap-3">
+                    @for (cv of cvs(); track cv.id) {
+                      <div class="cv-item-card d-flex align-items-center justify-content-between p-3 border rounded-4 transition-all"
+                           [class.is-main]="cv.isDefault"
+                           (click)="setDefault(cv.id)">
+                        <div class="d-flex align-items-center gap-3">
+                          <div class="form-check mb-0">
+                            <input class="form-check-input custom-radio" type="radio" 
+                                   [name]="'mainCv'" [checked]="cv.isDefault">
+                          </div>
+                          <div class="cv-info">
+                            <div class="d-flex align-items-center gap-2">
+                              <span class="fw-bold text-main">{{ cv.fileName }}</span>
+                              @if (cv.isDefault) {
+                                <span class="badge bg-primary-soft text-primary rounded-pill small">Mặc định</span>
+                              }
+                            </div>
+                            <div class="text-muted smallest">Ngày tải lên: {{ cv.uploadDate | date:'dd/MM/yyyy HH:mm' }}</div>
+                          </div>
+                        </div>
+                        <div class="cv-actions d-flex gap-2">
+                          <button class="btn btn-sm btn-light rounded-pill px-3" (click)="previewCV(cv.fileUrl, $event)">
+                            <i class="bi bi-eye"></i> Xem CV
+                          </button>
+                          <button class="btn btn-sm btn-outline-danger rounded-circle p-2" (click)="deleteCV(cv.id, $event)">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="upload-section pt-4 border-top">
+                <button class="btn btn-primary rounded-pill px-5 py-3 fw-bold hover-glow mb-2" 
+                        [disabled]="cvs().length >= 5"
+                        (click)="fileInput.click()">
+                  <i class="bi bi-cloud-arrow-up-fill me-2"></i> Tải lên CV mới
+                </button>
+                <p class="text-muted smallest">Hỗ trợ định dạng .doc, .docx, .pdf và dung lượng dưới 5MB. Giới hạn tối đa 5 bản CV.</p>
+                <input type="file" #fileInput hidden (change)="onFileSelected($event)" accept=".pdf,.doc,.docx">
+              </div>
+            </div>
+
+            <!-- TAB: VIỆC LÀM ĐÃ ỨNG TUYỂN -->
+            <div *ngSwitchCase="'applied'">
+              <h4 class="fw-bold text-gradient mb-4">Lịch sử ứng tuyển</h4>
+              <div class="jobs-grid-mini" *ngIf="appliedJobs().length > 0">
+                <div class="job-card-premium hover-glow" *ngFor="let app of appliedJobs()">
+                  <div class="card-header">
+                    <div class="brand-box-small">
+                      <img [src]="app.companyLogo || 'https://via.placeholder.com/40'" alt="Logo">
+                    </div>
+                    <span class="badge-status" [ngClass]="getStatusClass(app.status)">
+                      {{ getStatusText(app.status) }}
+                    </span>
+                  </div>
+                  <div class="card-body py-3">
+                    <h5 class="job-title-mini">{{ app.jobTitle }}</h5>
+                    <p class="company-name-mini">{{ app.companyName }}</p>
+                    <div class="meta-info smallest">
+                      <span><i class="bi bi-calendar-check-fill me-1"></i> nộp ngày {{ app.appliedAt | date:'dd/MM/yyyy' }}</span>
+                    </div>
+                  </div>
+                  <div class="card-footer-mini">
+                    <a [routerLink]="['/job', app.jobId]" class="btn-detail-mini">Chi tiết <i class="bi bi-arrow-right"></i></a>
+                  </div>
+                </div>
+              </div>
+              <ng-container *ngTemplateOutlet="emptyState; context: { $implicit: appliedJobs().length === 0, type: 'ứng tuyển' }"></ng-container>
+            </div>
+
+            <!-- TAB: VIỆC LÀM ĐÃ LƯU -->
+            <div *ngSwitchCase="'saved'">
+              <h4 class="fw-bold text-gradient mb-4">Việc làm đã lưu</h4>
+              <div class="jobs-list-stack" *ngIf="savedJobs().length > 0">
+                <div class="list-item-premium hover-glow" *ngFor="let item of savedJobs()">
+                  <div class="d-flex align-items-center gap-3 w-100">
+                    <div class="brand-box-small">
+                      <img [src]="item.job.company?.logoPath || 'https://via.placeholder.com/40'" alt="Logo">
+                    </div>
+                    <div class="flex-grow-1">
+                      <h5 class="job-title-small">{{ item.job.title }}</h5>
+                      <p class="company-name-small">{{ item.job.company?.name }}</p>
+                    </div>
+                    <div class="action-group d-flex gap-2">
+                       <button class="btn btn-sm btn-outline-danger rounded-pill" (click)="toggleSave(item.job.id)">
+                        <i class="bi bi-heart-fill"></i> Bỏ lưu
+                      </button>
+                      <a [routerLink]="['/job', item.job.id]" class="btn btn-sm btn-primary rounded-pill px-3">Ứng tuyển</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <ng-container *ngTemplateOutlet="emptyState; context: { $implicit: savedJobs().length === 0, type: 'đã lưu' }"></ng-container>
+            </div>
+
+            <!-- TAB: VIỆC LÀM ĐÃ XEM -->
+            <div *ngSwitchCase="'viewed'">
+              <h4 class="fw-bold text-gradient mb-4">Việc làm đã xem</h4>
+              <div class="jobs-list-stack" *ngIf="viewedJobs().length > 0">
+                <div class="list-item-premium hover-glow" *ngFor="let item of viewedJobs()">
+                  <div class="d-flex align-items-center gap-3 w-100">
+                    <div class="brand-box-small">
+                      <img [src]="item.job.company?.logoPath || 'https://via.placeholder.com/40'" alt="Logo">
+                    </div>
+                    <div class="flex-grow-1">
+                      <h5 class="job-title-small">{{ item.job.title }}</h5>
+                      <p class="company-name-small">{{ item.job.company?.name }}</p>
+                      <span class="time-ago text-muted smallest"><i class="bi bi-clock me-1"></i> {{ getTimeAgo(item.viewedAt) }}</span>
+                    </div>
+                    <a [routerLink]="['/job', item.job.id]" class="btn btn-sm btn-outline-primary rounded-pill px-3">Xem lại</a>
+                  </div>
+                </div>
+              </div>
+              <ng-container *ngTemplateOutlet="emptyState; context: { $implicit: viewedJobs().length === 0, type: 'đã xem' }"></ng-container>
+            </div>
+
+          </ng-container>
+        </div>
+
+        <!-- HIDE CV SECTION -->
+        <div class="card-premium mt-4 p-4">
+          <h5 class="fw-bold text-main mb-3">Ẩn CV chính của tôi với nhà tuyển dụng</h5>
+          <div class="search-company-wrapper">
+            <label class="form-label small text-muted">Nhập tên công ty bạn muốn ẩn</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+              <input type="text" class="form-control border-start-0" placeholder="Tìm kiếm công ty...">
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+<!-- Template cho Empty State các tab việc làm -->
+<ng-template #emptyState let-isEmpty let-type="type">
+  <div class="empty-state shadow-sm text-center py-5" *ngIf="isEmpty && !loading()">
+    <div class="empty-icon mb-4">
+      <i class="bi bi-inbox fs-1 text-muted opacity-25"></i>
+    </div>
+    <h5 class="fw-bold text-muted">Danh sách {{ type }} này đang trống!</h5>
+    <p class="text-secondary small mb-4">Khám phá hàng ngàn cơ hội việc làm hấp dẫn ngay hôm nay.</p>
+    <a routerLink="/jobs" class="btn btn-primary rounded-pill px-4 py-2 fw-bold hover-glow">Khám phá ngay</a>
+  </div>
+</ng-template>

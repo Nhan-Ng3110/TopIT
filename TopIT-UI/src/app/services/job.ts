@@ -22,4 +22,22 @@ export class JobService {
 
     return this.http.get<any[]>(`${this.apiUrl}/search`, { params });
   }
+
+  getJobById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  }
+
+  // --- Saved Jobs ---
+  toggleSaveJob(id: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/toggle-save/${id}`, {});
+  }
+
+  getSavedJobs(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/saved-jobs`);
+  }
+
+  // --- Viewed Jobs ---
+  getViewedJobs(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/viewed-jobs`);
+  }
 }

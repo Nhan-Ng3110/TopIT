@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router'; 
 import { AuthService } from '../../services/auth'; 
+import { NotificationService } from '../../services/notification';
 
 @Component({
   selector: 'app-register',
@@ -12,9 +13,9 @@ import { AuthService } from '../../services/auth';
   styleUrl: './register.scss' 
 })
 export class RegisterComponent {
-  // Tiêm (Inject) các dịch vụ cần thiết
   private authService = inject(AuthService);
   private router = inject(Router);
+  private notificationService = inject(NotificationService);
 
   registerData = {
     fullName: '',
@@ -25,21 +26,21 @@ export class RegisterComponent {
 
   onRegister() {
     if (this.registerData.password !== this.registerData.confirmPassword) {
-      alert('Mật khẩu xác nhận không khớp Nhân ơi!');
+      this.notificationService.warning('Mật khẩu xác nhận không khớp. Vui lòng kiểm tra lại!');
       return;
     }
 
     this.authService.register(this.registerData).subscribe({
       next: (res: any) => {
-        alert('Đăng ký thành công! Giờ sếp có thể đăng nhập được rồi.');
+        this.notificationService.success('Đăng ký thành công! Giờ bạn có thể đăng nhập được rồi.');
         this.router.navigate(['/login']); 
       },
       error: (err) => {
         console.error(err);
         if (err.status === 0) {
-          alert('Lỗi kết nối API: Không thể kết nối tới máy chủ. Nhân ơi, hãy kiểm tra xem API (backend) đã chạy chưa nhé!');
+          this.notificationService.error('Không thể kết nối tới máy chủ. Vui lòng kiểm tra xem backend đã chạy chưa nhé!');
         } else {
-          alert('Đăng ký thất bại: ' + (err.error?.message || 'Email đã tồn tại hoặc lỗi hệ thống'));
+          this.notificationService.error('Đăng ký thất bại: ' + (err.error?.message || 'Email đã tồn tại hoặc lỗi hệ thống'));
         }
       }
     });
