@@ -73,12 +73,25 @@ export class JobListComponent implements OnInit {
     salaryMin: null
   };
 
+  detailLoading = signal<boolean>(false);
+
   ngOnInit() {
     this.onSearch();
   }
 
   onSelectJob(job: any) {
-    this.selectedJob.set(job);
+    this.selectedJob.set(job); // cập nhật ngay để highlight card
+    this.detailLoading.set(true);
+    // Gọi getJobById → backend tự TrackView + trả về đầy đủ detail
+    this.jobService.getJobById(job.id).subscribe({
+      next: (detail) => {
+        this.selectedJob.set(detail);
+        this.detailLoading.set(false);
+      },
+      error: () => {
+        this.detailLoading.set(false); // fallback: giữ dữ liệu cũ
+      }
+    });
   }
 
   onSearch() {
@@ -87,7 +100,7 @@ export class JobListComponent implements OnInit {
         this.allJobs = data; 
         this.jobs.set(data);
         if (data && data.length > 0) {
-          this.selectedJob.set(data[0]); 
+          this.onSelectJob(data[0]); // load full detail cho job đầu tiên
         }
       },
       error: (err) => {
@@ -328,5 +341,26 @@ export class JobListComponent implements OnInit {
       },
       error: () => this.notificationService.error('Có lỗi xảy ra khi lưu công việc')
     });
+  }
+
+  // === HELPERS ===
+
+  /** Chuyển text thuần thành mảng đoạn văn (tách theo newline) */
+  formatLines(text: string): string[] {
+    if (!text) return [];
+    return text.split('\n').filter(line => line.trim().length > 0);
+  }
+
+  /** Chuyển text thành mảng bullet, tách theo dòng hoặc dấu chấm */
+  formatBullets(text: string): string[] {
+    if (!text) return [];
+    const lines = text
+      .split('\n')
+      .map(l => l.replace(/^[-•*]+\s*/, '').trim())
+      .filter(l => l.length > 0);
+    if (lines.length === 1) {
+      return lines[0].split(/[.;]/).map(s => s.trim()).filter(s => s.length > 3);
+    }
+    return lines;
   }
 }

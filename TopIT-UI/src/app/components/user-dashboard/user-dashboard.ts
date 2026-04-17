@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { ApplicationService } from '../../services/application';
@@ -19,6 +20,8 @@ export class UserDashboardComponent implements OnInit {
   private authService = inject(AuthService);
   private notification = inject(NotificationService);
   private route = inject(ActivatedRoute);
+  private platformId = inject(PLATFORM_ID);
+
 
   // Tab management using Signals
   activeTab = signal<'applied' | 'saved' | 'viewed'>('applied');
@@ -29,6 +32,9 @@ export class UserDashboardComponent implements OnInit {
   loading = signal<boolean>(false);
 
   ngOnInit() {
+    // Chỉ gọi API khi chạy ở browser (tránh SSR gửi request không có token)
+    if (!isPlatformBrowser(this.platformId)) return;
+
     this.route.queryParams.subscribe(params => {
       const tab = params['tab'];
       if (tab === 'applied' || tab === 'saved' || tab === 'viewed') {

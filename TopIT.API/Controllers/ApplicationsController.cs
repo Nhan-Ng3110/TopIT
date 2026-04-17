@@ -1,5 +1,5 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client;
 using TopIT.Core.Entities;
 using TopIT.Core.Interfaces;
 
@@ -116,6 +116,7 @@ namespace TopIT.API.Controllers
             return Ok(result);
         }
 
+        [Authorize]
         [HttpGet("my-applications")]
         public async Task<IActionResult> GetMyApplications()
         {

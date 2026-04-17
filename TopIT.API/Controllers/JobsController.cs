@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TopIT.Core.DTOs;
@@ -141,6 +142,7 @@ namespace TopIT.API.Controllers
             });
         }
 
+        [Authorize]
         [HttpPost("toggle-save/{id}")]
         public async Task<IActionResult> ToggleSave(int id)
         {
@@ -153,6 +155,7 @@ namespace TopIT.API.Controllers
             return Ok(new { isSaved = isSavedNow, message = isSavedNow ? "Đã lưu công việc" : "Đã bỏ lưu công việc" });
         }
 
+        [Authorize]
         [HttpGet("saved-jobs")]
         public async Task<IActionResult> GetMySavedJobs()
         {
@@ -178,6 +181,7 @@ namespace TopIT.API.Controllers
             return Ok(result);
         }
 
+        [Authorize]
         [HttpGet("viewed-jobs")]
         public async Task<IActionResult> GetMyViewedJobs()
         {

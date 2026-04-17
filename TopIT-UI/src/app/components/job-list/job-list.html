@@ -163,43 +163,191 @@
             </div>
           }
         </div>
-        <!-- Detail col... -->
+        <!-- Detail col - Saramin Style -->
         <div class="job-detail-col">
-          @if (selectedJob(); as detail) {
-            <div class="detail-view-card text-start">
-              <div class="detail-header">
-                <div class="d-flex align-items-start gap-4">
-                  <div class="logo-box-large"><i class="bi bi-buildings"></i></div>
-                  <div class="flex-grow-1">
-                    <h2 class="detail-title mb-1">{{ detail.title }}</h2>
-                    <p class="company-link fs-5 mb-3">{{ detail.company?.name }}</p>
-                  </div>
+          <!-- Loading Skeleton -->
+          @if (detailLoading()) {
+            <div class="detail-skeleton card-premium">
+              <div class="skeleton-header">
+                <div class="skeleton-logo skeleton-pulse"></div>
+                <div class="skeleton-text-group">
+                  <div class="skeleton-line skeleton-pulse" style="width:60%; height:24px;"></div>
+                  <div class="skeleton-line skeleton-pulse" style="width:40%; height:16px; margin-top:10px;"></div>
+                  <div class="skeleton-line skeleton-pulse" style="width:30%; height:16px; margin-top:8px;"></div>
                 </div>
               </div>
-              <div class="detail-body">
-                <h5>Mô tả công việc</h5>
-                <p class="description-text">{{ detail.description }}</p>
-                
-                <div class="mt-5 pt-4 border-top">
-                  <!-- Banner thông báo đã ứng tuyển -->
-                  <div class="applied-banner mb-3" *ngIf="detail.isApplied">
-                    <i class="bi bi-patch-check-fill me-2"></i>
-                    <span>Bạn đã nộp đơn cho vị trí này. Bạn có thể nhấn nút dưới đây để cập nhật hồ sơ mới nhất.</span>
-                  </div>
-
-                  <button class="btn btn-primary px-5 py-3 fw-bold rounded-pill hover-glow w-100 w-md-auto" 
-                          [class.btn-success]="detail.isApplied"
-                          (click)="apply(detail.id)">
-                    <i class="bi" [ngClass]="detail.isApplied ? 'bi-pencil-square' : 'bi-send-fill'"></i>
-                    {{ detail.isApplied ? ' Cập nhật ứng tuyển' : ' Ứng tuyển ngay' }}
-                  </button>
-                </div>
+              <div style="padding: 0 32px 32px;">
+                <div class="skeleton-line skeleton-pulse" style="width:100%; height:48px; border-radius:12px;"></div>
+                <div class="skeleton-line skeleton-pulse" style="width:100%; height:16px; margin-top:24px;"></div>
+                <div class="skeleton-line skeleton-pulse" style="width:80%; height:16px; margin-top:10px;"></div>
+                <div class="skeleton-line skeleton-pulse" style="width:90%; height:16px; margin-top:10px;"></div>
               </div>
             </div>
           }
+
+          <!-- Detail View -->
+          @if (!detailLoading() && selectedJob(); as detail) {
+            <div class="detail-saramin card-premium text-start">
+
+              <!-- ===== STICKY HEADER ===== -->
+              <div class="saramin-header">
+                <div class="saramin-company-row">
+                  <div class="saramin-logo">
+                    @if (detail.company?.logoPath) {
+                      <img [src]="detail.company.logoPath" [alt]="detail.company?.name">
+                    } @else {
+                      <i class="bi bi-buildings"></i>
+                    }
+                  </div>
+                  <div class="saramin-company-info">
+                    <div class="saramin-company-name">{{ detail.company?.name || 'Công ty' }}</div>
+                    <div class="saramin-meta-pills">
+                      <span class="meta-pill"><i class="bi bi-geo-alt-fill"></i> {{ detail.location }}</span>
+                      <span class="meta-pill"><i class="bi bi-briefcase-fill"></i> {{ detail.jobType }}</span>
+                      <span class="meta-pill"><i class="bi bi-bar-chart-steps"></i> {{ detail.level }}</span>
+                      <span class="meta-pill"><i class="bi bi-clock-fill"></i> {{ detail.createdAt | date:'dd/MM/yyyy' }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <h2 class="saramin-job-title">{{ detail.title }}</h2>
+
+                <!-- Salary + Action row -->
+                <div class="saramin-action-row">
+                  <div class="saramin-salary-box">
+                    <span class="salary-label">Mức lương</span>
+                    @if (detail.isNegotiable) {
+                      <span class="salary-value negotiable"><i class="bi bi-chat-square-text"></i> Thỏa thuận</span>
+                    } @else {
+                      <span class="salary-value">{{ detail.salaryMin | number }}<span class="salary-sep">—</span>{{ detail.salaryMax | number }} <small>VNĐ</small></span>
+                    }
+                  </div>
+                  <div class="saramin-action-group">
+                    <button class="btn-save-pill" 
+                            [class.is-saved]="detail.isSaved"
+                            (click)="toggleSaveJob($event, detail)">
+                      <i class="bi" [ngClass]="detail.isSaved ? 'bi-heart-fill' : 'bi-heart'"></i>
+                      {{ detail.isSaved ? 'Đã lưu' : 'Lưu việc' }}
+                    </button>
+                    <button class="btn-apply-saramin hover-glow"
+                            [class.is-applied]="detail.isApplied"
+                            (click)="apply(detail.id)">
+                      <i class="bi" [ngClass]="detail.isApplied ? 'bi-pencil-square' : 'bi-send-fill'"></i>
+                      {{ detail.isApplied ? 'Cập nhật ứng tuyển' : 'Ứng tuyển ngay' }}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Applied Banner -->
+                @if (detail.isApplied) {
+                  <div class="applied-banner-saramin">
+                    <i class="bi bi-patch-check-fill"></i>
+                    <span>Bạn đã nộp đơn cho vị trí này. Bấm <strong>Cập nhật ứng tuyển</strong> để thay đổi hồ sơ.</span>
+                  </div>
+                }
+              </div>
+
+              <!-- ===== BODY ===== -->
+              <div class="saramin-body">
+                <div class="saramin-main-col">
+
+                  <!-- Mô tả công việc -->
+                  <section class="saramin-section">
+                    <h3 class="section-heading"><span class="heading-accent"></span>Mô tả công việc</h3>
+                    <div class="saramin-content-text">
+                      @for (line of formatLines(detail.description); track $index) {
+                        <p class="content-line">{{ line }}</p>
+                      }
+                    </div>
+                  </section>
+
+                  <!-- Yêu cầu công việc -->
+                  @if (detail.requirements) {
+                    <section class="saramin-section">
+                      <h3 class="section-heading"><span class="heading-accent"></span>Yêu cầu công việc</h3>
+                      <ul class="saramin-bullet-list">
+                        @for (line of formatBullets(detail.requirements); track $index) {
+                          <li>{{ line }}</li>
+                        }
+                      </ul>
+                    </section>
+                  }
+
+                  <!-- Quyền lợi -->
+                  @if (detail.benefits) {
+                    <section class="saramin-section">
+                      <h3 class="section-heading"><span class="heading-accent"></span>Quyền lợi</h3>
+                      <ul class="saramin-bullet-list benefit-list">
+                        @for (line of formatBullets(detail.benefits); track $index) {
+                          <li><i class="bi bi-check-circle-fill"></i>{{ line }}</li>
+                        }
+                      </ul>
+                    </section>
+                  }
+
+                </div>
+
+                <!-- Sidebar Info -->
+                <div class="saramin-side-col">
+                  <div class="info-widget">
+                    <div class="info-widget-row">
+                      <span class="info-icon-wrap"><i class="bi bi-award-fill"></i></span>
+                      <div>
+                        <div class="info-label">Cấp bậc</div>
+                        <div class="info-value">{{ detail.level || '—' }}</div>
+                      </div>
+                    </div>
+                    <div class="info-widget-row">
+                      <span class="info-icon-wrap"><i class="bi bi-graph-up-arrow"></i></span>
+                      <div>
+                        <div class="info-label">Kinh nghiệm</div>
+                        <div class="info-value">{{ detail.experienceYears }} năm</div>
+                      </div>
+                    </div>
+                    <div class="info-widget-row">
+                      <span class="info-icon-wrap"><i class="bi bi-laptop-fill"></i></span>
+                      <div>
+                        <div class="info-label">Hình thức</div>
+                        <div class="info-value">{{ detail.jobType || '—' }}</div>
+                      </div>
+                    </div>
+                    <div class="info-widget-row">
+                      <span class="info-icon-wrap"><i class="bi bi-calendar-check-fill"></i></span>
+                      <div>
+                        <div class="info-label">Đăng ngày</div>
+                        <div class="info-value">{{ detail.createdAt | date:'dd/MM/yyyy' }}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  @if (detail.company?.description) {
+                    <div class="company-widget">
+                      <h4 class="widget-title"><i class="bi bi-buildings-fill"></i> Về công ty</h4>
+                      <p class="company-desc-text">{{ detail.company?.description }}</p>
+                      @if (detail.company?.size) {
+                        <div class="company-stat-row">
+                          <i class="bi bi-people-fill"></i>
+                          <span><strong>{{ detail.company.size }}</strong> nhân viên</span>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+
+            </div>
+          }
+
+          <!-- Empty state -->
+          @if (!detailLoading() && !selectedJob()) {
+            <div class="detail-empty card-premium">
+              <div class="empty-icon-wrap"><i class="bi bi-search"></i></div>
+              <p>Chọn một công việc bên trái để xem chi tiết</p>
+            </div>
+          }
         </div>
-      </div>
-    </div>
+      </div> <!-- /.master-detail-grid -->
+    </div> <!-- /.container -->
   </section>
 
   <!-- Lọc Nâng Cao (Offcanvas) -->
