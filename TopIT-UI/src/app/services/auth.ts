@@ -67,4 +67,28 @@ export class AuthService {
       return null;
     }
   }
+
+  getUserRoleFromToken(): string | null {
+    if (typeof window === 'undefined') return null;
+    const token = localStorage.getItem('topit_token');
+    if (!token) return null;
+    try {
+      const decoded: any = jwtDecode(token);
+      return decoded.role || decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || null;
+    } catch {
+      return null;
+    }
+  }
+
+  getCompanyIdFromToken(): number | null {
+    if (typeof window === 'undefined') return null;
+    const token = localStorage.getItem('topit_token');
+    if (!token) return null;
+    try {
+      const decoded: any = jwtDecode(token);
+      return decoded.CompanyId ? Number(decoded.CompanyId) : null;
+    } catch {
+      return null;
+    }
+  }
 }

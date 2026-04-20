@@ -1,6 +1,11 @@
 <div class="job-detail-container" *ngIf="job">
+  <!-- Brand Cover -->
+  <div class="company-cover-hero" *ngIf="job.company?.coverPath" [style.background-image]="'url(' + getCoverUrl(job.company.coverPath) + ')'">
+    <div class="cover-overlay"></div>
+  </div>
+
   <!-- Header Phần header công việc -->
-  <div class="job-header card-premium">
+  <div class="job-header card-premium" [class.has-cover]="job.company?.coverPath">
     <div class="header-main">
       <div class="company-logo">
         <img [src]="job.company?.logoPath || 'assets/default-company.png'" [alt]="job.company?.name">

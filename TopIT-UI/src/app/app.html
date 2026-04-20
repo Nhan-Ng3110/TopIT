@@ -1,8 +1,8 @@
 <header class="main-header navbar-modern sticky-top">
-  <div class="container-fluid px-4 px-md-5">
-    <div class="d-flex justify-content-between align-items-center py-3 py-md-4">
+  <div class="container-custom">
+    <div class="d-flex justify-content-between align-items-center w-100" style="min-height: 80px;">
       <a routerLink="/jobs" class="brand-logo d-flex align-items-center gap-2 text-decoration-none">
-        <img src="assets/images/logo.png" alt="TopIT Logo" class="logo-img">
+        <img src="/assets/images/logo.png" alt="TopIT Logo" class="logo-img">
       </a>
 
       <nav class="nav-menu d-none d-md-flex align-items-center gap-4 gap-lg-5">
@@ -32,11 +32,11 @@
                 <span>Quản lý CV</span>
               </a>
 
-              <a routerLink="/profile" class="dropdown-item-premium">
-                <i class="bi bi-person-circle"></i>
-                <span>Tài khoản</span>
+              <a *ngIf="userRole === 'Employer'" routerLink="/employer/dashboard" class="dropdown-item-premium recruitment">
+                <i class="bi bi-briefcase"></i>
+                <span>Quản lý tuyển dụng</span>
               </a>
-              
+
               <div class="dropdown-divider"></div>
               <a href="javascript:void(0)" (click)="logout()" class="dropdown-item-premium logout">
                 <i class="bi bi-box-arrow-right"></i>
@@ -46,9 +46,9 @@
           </div>
         </ng-template>
         
-        <button class="btn-post-job">
+        <a class="btn-post-job text-decoration-none" routerLink="/recruitment">
           Đăng tuyển
-        </button>
+        </a>
       </nav>
 
       <button class="btn btn-link d-md-none text-main fs-3 hamburger" aria-label="Toggle menu">
@@ -70,23 +70,24 @@
           <a routerLink="/dashboard" class="nav-link fs-5">Quản lý việc làm</a>
           <a routerLink="/cv-management" class="nav-link fs-5">Quản lý CV</a>
           <a routerLink="/profile" class="nav-link fs-5">Trang cá nhân ({{ userName }})</a>
+          <a *ngIf="userRole === 'Employer'" routerLink="/employer/dashboard" class="nav-link fs-5 text-primary">Quản lý tuyển dụng</a>
           <a href="javascript:void(0)" (click)="logout()" class="nav-link fs-5 text-danger">Đăng xuất</a>
         </ng-template>
 
-        <button class="btn-post-job w-100">
+        <a class="btn-post-job w-100 text-decoration-none text-center" routerLink="/recruitment">
           Đăng tuyển
-        </button>
+        </a>
       </nav>
     </div>
   </div>
 </header>
 
-<main class="pt-5 pt-md-0">
+<main>
   <router-outlet></router-outlet>
 </main>
 
 <footer class="main-footer mt-auto">
-  <div class="container text-center small">
+  <div class="container-custom text-center small">
     <p class="mb-2">© 2026 TopIT Platform • Công việc IT đã xác thực</p>
     <div class="d-flex justify-content-center gap-3">
       <a href="#" class="text-decoration-none">Điều khoản</a>

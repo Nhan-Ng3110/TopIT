@@ -104,3 +104,17 @@ body {
     box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
   }
 }
+
+// === CUSTOM CONTAINER FOR WIDE SCREENS ===
+.container-custom {
+  max-width: 1550px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  padding-left: 20px;
+  padding-right: 20px;
+
+  @media (max-width: 1400px) {
+    max-width: 1320px;
+  }
+}

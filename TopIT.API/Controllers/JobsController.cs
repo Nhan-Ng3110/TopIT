@@ -137,7 +137,7 @@ namespace TopIT.API.Controllers
                 job.CompanyId,
                 job.Company,
                 IsApplied = isApplied,
-                IsSaved = isSaved, // Bổ sung IsSaved
+                IsSaved = isSaved, 
                 ExistingApplication = existingApplicationData
             });
         }
@@ -207,15 +207,84 @@ namespace TopIT.API.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "Employer")]
+        [HttpGet("my-jobs")]
+        public async Task<IActionResult> GetEmployerJobs()
+        {
+            var companyIdClaim = User.FindFirst("CompanyId")?.Value;
+            if (string.IsNullOrEmpty(companyIdClaim)) return BadRequest("Tài khoản chưa được liên kết với công ty.");
+
+            int companyId = int.Parse(companyIdClaim);
+            var jobs = await _jobRepo.GetJobsByCompanyIdAsync(companyId);
+            return Ok(jobs);
+        }
+
+        [Authorize(Roles = "Employer")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Job job)
         {
+            var companyIdClaim = User.FindFirst("CompanyId")?.Value;
+            if (string.IsNullOrEmpty(companyIdClaim)) return BadRequest("Tài khoản chưa được liên kết với công ty.");
+
             if(job.SalaryMax < job.SalaryMin)
             {
                 return BadRequest("Lương tối đa phải lớn hơn hoặc bằng lương tối thiểu");
             }    
+            
+            job.CompanyId = int.Parse(companyIdClaim);
+            job.CreatedAt = DateTime.UtcNow;
+
             await _jobRepo.AddAsync(job);
             return CreatedAtAction(nameof(GetById), new { id = job.Id }, job);
+        }
+
+        [Authorize(Roles = "Employer")]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] Job job)
+        {
+            if (id != job.Id) return BadRequest("ID mismatch");
+
+            var companyIdClaim = User.FindFirst("CompanyId")?.Value;
+            if (string.IsNullOrEmpty(companyIdClaim)) return Unauthorized();
+            int companyId = int.Parse(companyIdClaim);
+
+            var existing = await _jobRepo.GetByIDAsync(id);
+            if (existing == null) return NotFound();
+            
+            if (existing.CompanyId != companyId) return Forbid("Bạn không có quyền sửa tin của công ty khác");
+
+            // Update fields manually to avoid accidental company change
+            existing.Title = job.Title;
+            existing.Description = job.Description;
+            existing.Requirements = job.Requirements;
+            existing.Benefits = job.Benefits;
+            existing.Location = job.Location;
+            existing.SalaryMin = job.SalaryMin;
+            existing.SalaryMax = job.SalaryMax;
+            existing.IsNegotiable = job.IsNegotiable;
+            existing.Level = job.Level;
+            existing.JobType = job.JobType;
+            existing.ExperienceYears = job.ExperienceYears;
+
+            await _jobRepo.UpdateAsync(existing);
+            return Ok(new { message = "Cập nhật thành công" });
+        }
+
+        [Authorize(Roles = "Employer")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var companyIdClaim = User.FindFirst("CompanyId")?.Value;
+            if (string.IsNullOrEmpty(companyIdClaim)) return Unauthorized();
+            int companyId = int.Parse(companyIdClaim);
+
+            var job = await _jobRepo.GetByIDAsync(id);
+            if (job == null) return NotFound();
+            
+            if (job.CompanyId != companyId) return Forbid();
+
+            await _jobRepo.DeleteAsync(id);
+            return Ok(new { message = "Xóa thành công" });
         }
     }
 }

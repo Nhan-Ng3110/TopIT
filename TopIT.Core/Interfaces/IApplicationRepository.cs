@@ -13,6 +13,7 @@ namespace TopIT.Core.Interfaces
         Task<JobApplication> GetByIdAsync(int id);
         Task<IEnumerable<JobApplication>> GetByJobIdAsync(int JobId);
         Task<IEnumerable<JobApplication>> GetByUserIdAsync(int UserId);
+        Task<IEnumerable<JobApplication>> GetByCompanyIdAsync(int CompanyId);
 
         Task<bool> UpdateStatusAsync(int ApplicationId, string NewStatus);
         Task UpdateAsync(JobApplication application);

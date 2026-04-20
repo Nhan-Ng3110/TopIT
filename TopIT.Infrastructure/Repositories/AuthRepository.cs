@@ -96,6 +96,11 @@ namespace TopIT.Infrastructure.Repositories
                 new Claim(ClaimTypes.Role, user.Role)
             };
 
+            if (user.CompanyId.HasValue)
+            {
+                claims.Add(new Claim("CompanyId", user.CompanyId.Value.ToString()));
+            }
+
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Key").Value!));
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);

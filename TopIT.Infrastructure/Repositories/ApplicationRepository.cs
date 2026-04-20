@@ -38,6 +38,16 @@ namespace TopIT.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<JobApplication>> GetByCompanyIdAsync(int CompanyId)
+        {
+            return await _context.JobApplications
+                .Include(a => a.User)
+                .Include(a => a.Job)
+                .Where(a => a.Job.CompanyId == CompanyId)
+                .OrderByDescending(a => a.AppliedAt)
+                .ToListAsync();
+        }
+
         public async Task<bool> UpdateStatusAsync(int ApplicationId, string NewStatus)
         {
             var app = await _context.JobApplications.FindAsync(ApplicationId);

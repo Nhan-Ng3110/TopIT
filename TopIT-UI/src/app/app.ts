@@ -15,6 +15,7 @@ export class App implements OnInit {
   private authService = inject(AuthService);
   
   userName: string | null = null;
+  userRole: string | null = null;
   isLoggedIn = false;
 
   ngOnInit() {
@@ -22,6 +23,7 @@ export class App implements OnInit {
     this.authService.currentUser$.subscribe(name => {
       this.userName = name;
       this.isLoggedIn = !!name;
+      this.userRole = this.authService.getUserRoleFromToken();
     });
   }
 

@@ -24,5 +24,10 @@ namespace TopIT.Core.Interfaces
         // Viewed Jobs
         Task TrackViewJobAsync(int userId, int jobId);
         Task<IEnumerable<ViewedJob>> GetViewedJobsAsync(int userId);
+
+        // Employer specialized methods
+        Task<IEnumerable<Job>> GetJobsByCompanyIdAsync(int companyId);
+        Task UpdateAsync(Job job);
+        Task DeleteAsync(int id);
     }
 }

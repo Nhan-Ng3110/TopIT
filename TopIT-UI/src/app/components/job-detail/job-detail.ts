@@ -157,4 +157,8 @@ export class JobDetailComponent implements OnInit {
       }
     });
   }
+
+  getCoverUrl(path: string): string {
+    return `https://localhost:7151/uploads/covers/${path}`;
+  }
 }

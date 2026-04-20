@@ -1,0 +1,129 @@
+.recruitment-page {
+  background-color: var(--bg-secondary);
+  min-height: 100vh;
+}
+
+.container-custom {
+  max-width: 1240px;
+}
+
+.text-main { color: var(--text-main); }
+.text-primary { color: var(--primary-color); }
+
+// --- Left Column ---
+.feature-card-item {
+  height: 100%;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #eef2f6;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.06);
+  }
+
+  h5 { font-size: 0.95rem; line-height: 1.4; color: #1a202c; }
+  p { font-size: 0.8rem; margin-bottom: 0; }
+}
+
+.badge-discount {
+  position: absolute;
+  top: 10px;
+  right: -30px;
+  background: #f43f5e; // Rose 500
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 4px 30px;
+  transform: rotate(45deg);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.grid-logos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+  opacity: 0.7;
+
+  img {
+    height: 28px;
+    width: auto;
+    filter: grayscale(1);
+    transition: all 0.3s ease;
+    &:hover { filter: grayscale(0); opacity: 1; transform: scale(1.1); }
+  }
+}
+
+.feature-banner-box {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border-left: 5px solid var(--primary-color);
+  
+  h6 { font-size: 1rem; color: var(--text-main); }
+  li { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); }
+}
+
+// --- Right Column (Form) ---
+.request-form-card {
+  background: white;
+  padding: 48px;
+  border-radius: 28px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 40px 100px rgba(15, 23, 42, 0.08);
+  position: sticky;
+  top: 100px;
+}
+
+.form-header {
+  margin-bottom: 32px;
+  h2 { font-size: 1.85rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em; }
+  p { color: var(--text-muted); font-size: 1rem; }
+}
+
+.form-control, .form-select {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  background: #f8fafc;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s;
+
+  &:focus {
+    background: white;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  }
+}
+
+.btn-submit-premium {
+  background: var(--accent-gradient);
+  color: white;
+  border: none;
+  border-radius: 100px;
+  font-size: 1.1rem;
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.form-check-label {
+  color: var(--text-muted);
+  font-weight: 500;
+  line-height: 1.5;
+  a { color: var(--primary-color); font-weight: 700; text-decoration: none; &:hover { text-decoration: underline; } }
+}
+
+.form-check-input:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}

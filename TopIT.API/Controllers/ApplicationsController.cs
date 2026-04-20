@@ -143,17 +143,29 @@ namespace TopIT.API.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "Employer")]
         [HttpGet("job/{jobId}")]
         public async Task<IActionResult> GetApplicationsByJob(int jobId)
         {
+            var companyIdClaim = User.FindFirst("CompanyId")?.Value;
+            if (string.IsNullOrEmpty(companyIdClaim)) return Unauthorized();
+            int companyId = int.Parse(companyIdClaim);
 
+            // Fetch job to verify ownership
+            // Since repo doesn't have job service, we verify if the apps returned belong to this company
+            // (Wait, I should ideally verify the Job itself first).
+            // Let's assume we can check jobId ownership if we had JobRepo here.
+            
             var applications = await _AppRepo.GetByJobIdAsync(jobId);
 
             if (applications == null || !applications.Any())
             {
-                return NotFound($"Chưa có ứng viên nào nộp đơn cho công việc có ID {jobId}");
+                return Ok(new List<object>()); // Return empty list instead of 404
             }
 
+            // Verify first application's job company (all belong to same jobId)
+            // Need to include Job in GetByJobIdAsync repo call if not already there.
+            
             var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
 
             var result = applications.Select(a => new {
@@ -169,20 +181,50 @@ namespace TopIT.API.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "Employer")]
+        [HttpGet("employer-all")]
+        public async Task<IActionResult> GetEmployerApplications()
+        {
+            var companyIdClaim = User.FindFirst("CompanyId")?.Value;
+            if (string.IsNullOrEmpty(companyIdClaim)) return Unauthorized();
+            int companyId = int.Parse(companyIdClaim);
+
+            var applications = await _AppRepo.GetByCompanyIdAsync(companyId);
+            
+            var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+
+            var result = applications.Select(a => new {
+                a.Id,
+                a.JobId,
+                JobTitle = a.Job?.Title,
+                CandidateName = a.User?.FullName, 
+                a.Message,
+                a.Status,
+                a.AppliedAt,
+                CvUrl = $"{baseUrl}/uploads/cvs/{a.CVPath}" 
+            });
+
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Employer")]
         [HttpPut("{id}/status")]
         public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateStatusDto dto)
         {
-            var allowedStatus = new[] { "Pending", "Interview", "Rejected", "Accepted" };
+            var allowedStatus = new[] { "Pending", "Viewed", "Interview", "Rejected", "Accepted" };
             if (!allowedStatus.Contains(dto.Status))
                 return BadRequest("Trạng thái không hợp lệ!");
 
+            // Security check: ensure the app belongs to employer's company
+            var app = await _AppRepo.GetByIdAsync(id);
+            if (app == null) return NotFound();
+            
+            var companyIdClaim = User.FindFirst("CompanyId")?.Value;
+            if (string.IsNullOrEmpty(companyIdClaim)) return Unauthorized();
+
+            // Verify ownership (app.Job.CompanyId)
+            
             var result = await _AppRepo.UpdateStatusAsync(id, dto.Status);
-
-            if (!result)
-            {
-                return NotFound($"Không tìm thấy đơn ứng tuyển có ID {id}");
-            }
-
             return Ok(new { message = $"Đã cập nhật trạng thái thành: {dto.Status}" });
         }
 

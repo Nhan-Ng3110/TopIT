@@ -9,14 +9,14 @@ $shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
 
 // === HEADER ===
 .navbar-modern {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: #ffffff !important; 
   border-bottom: 1px solid $border-light;
   position: sticky;
   top: 0;
-  z-index: 9999; // Set very high to avoid overlap
+  z-index: 10001; 
   box-shadow: $shadow-sm;
+  min-height: 80px; 
+  overflow: visible;
 
   .brand-logo {
     display: flex;
@@ -47,6 +47,7 @@ $shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
     border-radius: 100px;
     padding: 10px 24px;
     font-weight: 700;
+    cursor: pointer;
     transition: all 0.3s ease;
     &:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
   }

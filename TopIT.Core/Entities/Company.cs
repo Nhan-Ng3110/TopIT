@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -18,6 +18,7 @@ namespace TopIT.Core.Entities
         public string? Description { get; set; } // Giới thiệu về công ty
 
         public string? LogoPath { get; set; } // Lưu đường dẫn ảnh logo 
+        public string? CoverPath { get; set; } // Lưu đường dẫn ảnh bìa công ty
 
         public string? Website { get; set; } // Link website công ty
 
