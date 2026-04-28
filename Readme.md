@@ -7,7 +7,7 @@
 
 ---
 
-## 📖 Overview
+## Overview
 
 TopIT được xây dựng nhằm giải quyết bài toán kết nối giữa **Doanh nghiệp IT** và **Ứng viên Công nghệ**.
 
@@ -42,7 +42,7 @@ Client[Client Side Angular SPA] -->|HTTP REST API| Gateway[ASP.NET Core Web API]
         Service <-->|REST API| PyService[Python AI Service]
     end
 
-### 🔍 Technical Breakdown
+### Technical Breakdown
 
 | Layer                    | Responsibility                         | Technology                         |
 | ------------------------ | -------------------------------------- | ---------------------------------- |
@@ -61,22 +61,22 @@ Client[Client Side Angular SPA] -->|HTTP REST API| Gateway[ASP.NET Core Web API]
 
 - [x] Đăng ký / Đăng nhập
 - [x] Quản lý hồ sơ cá nhân (Profile)
-- [ ] Tìm kiếm việc làm theo kỹ năng, từ khóa, mức lương
-- [ ] Ứng tuyển và theo dõi trạng thái hồ sơ
+- [x]Tìm kiếm việc làm theo kỹ năng, từ khóa, mức lương
+- [x] Ứng tuyển và theo dõi trạng thái hồ sơ
 - [ ] Tạo CV trực tuyến (CV Builder)
 
 ### Recruiter (Nhà tuyển dụng)
 
-- [ ] Đăng tin tuyển dụng
-- [ ] Quản lý danh sách tin đăng
-- [ ] Xem ứng viên đã ứng tuyển
+- [x] Đăng tin tuyển dụng
+- [x] Quản lý danh sách tin đăng
+- [x] Xem ứng viên đã ứng tuyển
 - [ ] Lọc ứng viên theo kỹ năng
 
 ### Admin
 
-- [ ] Quản lý người dùng
+- [x] Quản lý người dùng
 - [ ] Quản lý nội dung hệ thống
-- [ ] Dashboard thống kê & báo cáo
+- [x] Dashboard thống kê & báo cáo
 
 ---
 
@@ -92,11 +92,11 @@ Trong giai đoạn tiếp theo, hệ thống sẽ tích hợp một **Python AI 
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Category            | Technology            | Notes                                 |
 | ------------------- | --------------------- | ------------------------------------- |
-| **Backend**         | ASP.NET Core 8        | Web API, DI, Clean Architecture-ready |
+| **Backend**         | ASP.NET Core 9        | Web API, DI, Clean Architecture-ready |
 | **Frontend**        | Angular 16+           | SPA, RxJS, Angular Material           |
 | **Database**        | SQL Server            | Code First với EF Core                |
 | **Authentication**  | JWT                   | Secure API Access                     |
@@ -106,9 +106,9 @@ Trong giai đoạn tiếp theo, hệ thống sẽ tích hợp một **Python AI 
 
 ---
 
-## ⚙️ Installation & Setup
+## Installation & Setup
 
-### 🔧 Prerequisites
+### Prerequisites
 
 - .NET SDK 9.0+
 - Node.js & npm
@@ -116,7 +116,7 @@ Trong giai đoạn tiếp theo, hệ thống sẽ tích hợp một **Python AI 
 
 ---
 
-### 📥 Clone Repository
+### Clone Repository
 
 ```bash
 git clone https://github.com/Nhan-Ng3110/TopIT.git
@@ -139,7 +139,7 @@ API mặc định chạy tại:
 
 ---
 
-### 🌐 Frontend Setup
+### Frontend Setup
 
 ```bash
 cd Frontend
@@ -156,8 +156,8 @@ Frontend mặc định chạy tại:
 
 Nếu bạn quan tâm đến dự án hoặc muốn đóng góp:
 
-- 📧 Email: tnhan31102005@gmail.com
-- 💼 LinkedIn: www.linkedin.com/in/thành-nhân-nguyễn-376b79381
+- Email: tnhan31102005@gmail.com
+- LinkedIn: www.linkedin.com/in/thành-nhân-nguyễn-376b79381
 
 ---
 
