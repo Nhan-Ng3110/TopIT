@@ -12,5 +12,7 @@ namespace TopIT.Core.Interfaces
         Task<User> Register(User user, string password);
         Task<string> Login(string email, string password);
         Task<bool> UserExists(string email);
+        Task<User> GetUserByEmail(string email);
+        Task UpdateUserRole(User user, string role);
     }
 }

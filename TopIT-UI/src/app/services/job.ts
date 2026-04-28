@@ -40,4 +40,17 @@ export class JobService {
   getViewedJobs(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/viewed-jobs`);
   }
+
+  // --- Employer Jobs ---
+  getEmployerJobs(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/my-jobs`);
+  }
+
+  createJob(jobData: any): Observable<any> {
+    return this.http.post<any>(this.apiUrl, jobData);
+  }
+
+  toggleJobStatus(jobId: number): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/${jobId}/toggle-status`, {});
+  }
 }

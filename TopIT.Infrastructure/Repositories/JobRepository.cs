@@ -152,6 +152,29 @@ namespace TopIT.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<EmployerJobDto>> GetEmployerJobsWithCountAsync(int companyId)
+        {
+            return await _context.Jobs
+                .Where(j => j.CompanyId == companyId)
+                .OrderByDescending(j => j.CreatedAt)
+                .Select(j => new EmployerJobDto
+                {
+                    Id = j.Id,
+                    Title = j.Title,
+                    Location = j.Location,
+                    SalaryMin = j.SalaryMin,
+                    SalaryMax = j.SalaryMax,
+                    IsNegotiable = j.IsNegotiable,
+                    Level = j.Level,
+                    JobType = j.JobType,
+                    ExperienceYears = j.ExperienceYears,
+                    CreatedAt = j.CreatedAt,
+                    IsActive = j.IsActive,
+                    ApplicationCount = _context.JobApplications.Count(a => a.JobId == j.Id)
+                })
+                .ToListAsync();
+        }
+
         public async Task UpdateAsync(Job job)
         {
             _context.Jobs.Update(job);

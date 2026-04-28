@@ -40,4 +40,14 @@ export class ApplicationService {
   getMyApplications(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/my-applications`);
   }
+
+  // 6. Lấy danh sách ứng viên (Dành cho Employer)
+  getEmployerApplications(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/employer-all`);
+  }
+
+  // 7. Cập nhật trạng thái ứng viên
+  updateApplicationStatus(id: number, status: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}/status`, { status });
+  }
 }

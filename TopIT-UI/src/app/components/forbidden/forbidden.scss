@@ -1,0 +1,26 @@
+.forbidden-page {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+
+  .forbidden-card {
+    max-width: 480px;
+    width: 100%;
+  }
+
+  .error-code {
+    font-size: 6rem;
+    font-weight: 900;
+    line-height: 1;
+    background: linear-gradient(135deg, #ef4444, #f97316);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .error-icon {
+    font-size: 3rem;
+    margin-top: 0.5rem;
+  }
+}

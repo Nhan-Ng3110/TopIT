@@ -27,6 +27,7 @@ namespace TopIT.Core.Interfaces
 
         // Employer specialized methods
         Task<IEnumerable<Job>> GetJobsByCompanyIdAsync(int companyId);
+        Task<IEnumerable<EmployerJobDto>> GetEmployerJobsWithCountAsync(int companyId);
         Task UpdateAsync(Job job);
         Task DeleteAsync(int id);
     }

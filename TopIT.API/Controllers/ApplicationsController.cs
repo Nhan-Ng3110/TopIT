@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using TopIT.API.Hubs;
 using TopIT.Core.Entities;
 using TopIT.Core.Interfaces;
 
@@ -10,11 +12,15 @@ namespace TopIT.API.Controllers
     public class ApplicationsController : ControllerBase
     {
         public readonly IApplicationRepository _AppRepo;
-        private readonly IWebHostEnvironment _env; // Dùng để lấy đường dẫn thư mục trên máy
+        private readonly IJobRepository _jobRepo;
+        private readonly IHubContext<NotificationHub> _hubContext;
+        private readonly IWebHostEnvironment _env;
 
-        public ApplicationsController(IApplicationRepository appRepo, IWebHostEnvironment env)
+        public ApplicationsController(IApplicationRepository appRepo, IJobRepository jobRepo, IHubContext<NotificationHub> hubContext, IWebHostEnvironment env)
         {
             _AppRepo = appRepo;
+            _jobRepo = jobRepo;
+            _hubContext = hubContext;
             _env = env;
         }
 
@@ -152,9 +158,9 @@ namespace TopIT.API.Controllers
             int companyId = int.Parse(companyIdClaim);
 
             // Fetch job to verify ownership
-            // Since repo doesn't have job service, we verify if the apps returned belong to this company
-            // (Wait, I should ideally verify the Job itself first).
-            // Let's assume we can check jobId ownership if we had JobRepo here.
+            var job = await _jobRepo.GetByIDAsync(jobId);
+            if (job == null) return NotFound("Công việc không tồn tại");
+            if (job.CompanyId != companyId) return Forbid("Bạn không có quyền truy cập hồ sơ của công việc này");
             
             var applications = await _AppRepo.GetByJobIdAsync(jobId);
 
@@ -162,9 +168,6 @@ namespace TopIT.API.Controllers
             {
                 return Ok(new List<object>()); // Return empty list instead of 404
             }
-
-            // Verify first application's job company (all belong to same jobId)
-            // Need to include Job in GetByJobIdAsync repo call if not already there.
             
             var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
 
@@ -221,10 +224,21 @@ namespace TopIT.API.Controllers
             
             var companyIdClaim = User.FindFirst("CompanyId")?.Value;
             if (string.IsNullOrEmpty(companyIdClaim)) return Unauthorized();
+            int companyId = int.Parse(companyIdClaim);
 
-            // Verify ownership (app.Job.CompanyId)
+            // Verify ownership
+            if (app.Job == null)
+            {
+                app.Job = await _jobRepo.GetByIDAsync(app.JobId);
+            }
+            if (app.Job?.CompanyId != companyId) return Forbid("Bạn không có quyền thao tác trên hồ sơ này");
             
             var result = await _AppRepo.UpdateStatusAsync(id, dto.Status);
+            
+            // Send real-time notification to the candidate
+            await _hubContext.Clients.User(app.UserId.ToString())
+                .SendAsync("ReceiveNotification", $"Hồ sơ ứng tuyển của bạn cho vị trí '{app.Job?.Title}' đã được chuyển sang trạng thái: {dto.Status}");
+
             return Ok(new { message = $"Đã cập nhật trạng thái thành: {dto.Status}" });
         }
 

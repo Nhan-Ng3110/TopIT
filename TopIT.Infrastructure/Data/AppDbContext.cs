@@ -21,6 +21,7 @@ namespace TopIT.Infrastructure.Data
         public DbSet<UserCV> UserCVs { get; set; }
         public DbSet<SavedJob> SavedJobs { get; set; }
         public DbSet<ViewedJob> ViewedJobs { get; set; }
+        public DbSet<ConsultationRequest> ConsultationRequests { get; set; }
     }
 }
 

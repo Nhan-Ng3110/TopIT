@@ -29,8 +29,18 @@ export class LoginComponent {
         if (res.token) {
           this.notificationService.success('Đăng nhập thành công! Chào mừng bạn quay trở lại.');
           
-          const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/jobs';
-          this.router.navigateByUrl(returnUrl);
+          const role = this.authService.getUserRoleFromToken();
+          const returnUrl = this.route.snapshot.queryParams['returnUrl'];
+          
+          if (returnUrl) {
+            this.router.navigateByUrl(returnUrl);
+          } else if (role === 'Admin') {
+            this.router.navigate(['/admin/consultation-requests']);
+          } else if (role === 'Employer') {
+            this.router.navigate(['/employer']);
+          } else {
+            this.router.navigate(['/jobs']);
+          }
         }
       },
       error: (err) => {

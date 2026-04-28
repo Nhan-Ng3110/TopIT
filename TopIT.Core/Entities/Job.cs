@@ -41,6 +41,8 @@ namespace TopIT.Core.Entities
 
         public string? Requirements { get; set; } // Yêu cầu công việc
         public string? Benefits { get; set; } // Quyền lợi
+        
+        public bool IsActive { get; set; } = true; // Trạng thái tin đăng (Mở/Đóng)
 
     }
 }

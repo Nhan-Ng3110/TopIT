@@ -19,11 +19,13 @@ namespace TopIT.Infrastructure.Repositories
     {
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IJwtService _jwtService;
 
-        public AuthRepository(AppDbContext context, IConfiguration configuration)
+        public AuthRepository(AppDbContext context, IConfiguration configuration, IJwtService jwtService)
         {
             _context = context;
             _configuration = configuration;
+            _jwtService = jwtService;
         }
 
         public async Task<string> Login(string email, string password)
@@ -43,7 +45,7 @@ namespace TopIT.Infrastructure.Repositories
                 return null;
             }
 
-            return CreateToken(user);
+            return _jwtService.CreateToken(user);
         }
 
         public async Task<User> Register(User user, string password)
@@ -68,6 +70,18 @@ namespace TopIT.Infrastructure.Repositories
             return false;
         }
 
+        public async Task<User> GetUserByEmail(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(x => x.Email.Trim().ToLower() == email.Trim().ToLower());
+        }
+
+        public async Task UpdateUserRole(User user, string role)
+        {
+            user.Role = role;
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+        }
+
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             using (var hmac = new HMACSHA512())
@@ -84,41 +98,6 @@ namespace TopIT.Infrastructure.Repositories
                 var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
                 return computedHash.SequenceEqual(passwordHash);
             }
-        }
-
-        private string CreateToken(User user)
-        {
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.FullName),
-                new Claim(ClaimTypes.Role, user.Role)
-            };
-
-            if (user.CompanyId.HasValue)
-            {
-                claims.Add(new Claim("CompanyId", user.CompanyId.Value.ToString()));
-            }
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Key").Value!));
-
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddDays(1),
-                SigningCredentials = creds,
-                Issuer = _configuration.GetSection("Jwt:Issuer").Value,
-                Audience = _configuration.GetSection("Jwt:Audience").Value
-            };
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-
-            return tokenHandler.WriteToken(token);
         }
     }
 }

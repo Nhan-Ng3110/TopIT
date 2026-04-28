@@ -215,7 +215,7 @@ namespace TopIT.API.Controllers
             if (string.IsNullOrEmpty(companyIdClaim)) return BadRequest("Tài khoản chưa được liên kết với công ty.");
 
             int companyId = int.Parse(companyIdClaim);
-            var jobs = await _jobRepo.GetJobsByCompanyIdAsync(companyId);
+            var jobs = await _jobRepo.GetEmployerJobsWithCountAsync(companyId);
             return Ok(jobs);
         }
 
@@ -285,6 +285,25 @@ namespace TopIT.API.Controllers
 
             await _jobRepo.DeleteAsync(id);
             return Ok(new { message = "Xóa thành công" });
+        }
+
+        [Authorize(Roles = "Employer")]
+        [HttpPatch("{id}/toggle-status")]
+        public async Task<IActionResult> ToggleStatus(int id)
+        {
+            var companyIdClaim = User.FindFirst("CompanyId")?.Value;
+            if (string.IsNullOrEmpty(companyIdClaim)) return Unauthorized();
+            int companyId = int.Parse(companyIdClaim);
+
+            var existing = await _jobRepo.GetByIDAsync(id);
+            if (existing == null) return NotFound("Không tìm thấy công việc");
+            
+            if (existing.CompanyId != companyId) return Forbid("Bạn không có quyền sửa tin của công ty khác");
+
+            existing.IsActive = !existing.IsActive;
+            await _jobRepo.UpdateAsync(existing);
+
+            return Ok(new { IsActive = existing.IsActive, message = existing.IsActive ? "Đã mở lại tin tuyển dụng" : "Đã đóng tin tuyển dụng" });
         }
     }
 }

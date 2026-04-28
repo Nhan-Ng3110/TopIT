@@ -1,0 +1,91 @@
+<div class="job-form-container card-premium">
+  <div class="form-header">
+    <h3>Đăng Tin Tuyển Dụng Mới</h3>
+    <button class="btn-close" (click)="cancel()">×</button>
+  </div>
+
+  <form [formGroup]="jobForm" (ngSubmit)="onSubmit()" class="job-form">
+    <div class="form-group">
+      <label>Tiêu đề công việc <span class="required">*</span></label>
+      <input type="text" formControlName="title" class="form-control" placeholder="Ví dụ: Lập trình viên Frontend (Angular)">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group half">
+        <label>Địa điểm <span class="required">*</span></label>
+        <select formControlName="location" class="form-control">
+          <option value="Hồ Chí Minh">Hồ Chí Minh</option>
+          <option value="Hà Nội">Hà Nội</option>
+          <option value="Đà Nẵng">Đà Nẵng</option>
+          <option value="Remote">Remote</option>
+        </select>
+      </div>
+      <div class="form-group half">
+        <label>Kinh nghiệm (năm) <span class="required">*</span></label>
+        <input type="number" formControlName="experienceYears" class="form-control" min="0">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group half">
+        <label>Cấp bậc <span class="required">*</span></label>
+        <select formControlName="level" class="form-control">
+          <option value="Intern">Intern</option>
+          <option value="Fresher">Fresher</option>
+          <option value="Junior">Junior</option>
+          <option value="Middle">Middle</option>
+          <option value="Senior">Senior</option>
+          <option value="Lead/Manager">Lead/Manager</option>
+        </select>
+      </div>
+      <div class="form-group half">
+        <label>Loại công việc <span class="required">*</span></label>
+        <select formControlName="jobType" class="form-control">
+          <option value="Full-time">Full-time</option>
+          <option value="Part-time">Part-time</option>
+          <option value="Freelance">Freelance</option>
+          <option value="Remote">Remote</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group third">
+        <label>Lương tối thiểu (VND)</label>
+        <input type="number" formControlName="salaryMin" class="form-control" placeholder="Tối thiểu">
+      </div>
+      <div class="form-group third">
+        <label>Lương tối đa (VND)</label>
+        <input type="number" formControlName="salaryMax" class="form-control" placeholder="Tối đa">
+      </div>
+      <div class="form-group third checkbox-group">
+        <label>
+          <input type="checkbox" formControlName="isNegotiable"> Lương thỏa thuận
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Mô tả công việc <span class="required">*</span></label>
+      <textarea formControlName="description" class="form-control" rows="4" placeholder="Mô tả chi tiết..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Yêu cầu ứng viên</label>
+      <textarea formControlName="requirements" class="form-control" rows="3" placeholder="Các yêu cầu..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Quyền lợi</label>
+      <textarea formControlName="benefits" class="form-control" rows="3" placeholder="Các quyền lợi..."></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-outline" (click)="cancel()">Hủy</button>
+      <button type="submit" class="btn btn-primary" [disabled]="jobForm.invalid || isSubmitting">
+        <span *ngIf="isSubmitting" class="spinner"></span>
+        <span *ngIf="!isSubmitting">Đăng Tin</span>
+      </button>
+    </div>
+  </form>
+</div>

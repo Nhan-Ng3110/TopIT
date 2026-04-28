@@ -1,10 +1,9 @@
 import { Component, OnInit, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { ApplicationService } from '../../../services/application';
 import { NotificationService } from '../../../services/notification';
 import { FormsModule } from '@angular/forms';
-
-const API_BASE_URL = 'https://localhost:7151';
+import { SafePipe } from '../../../shared/pipes/safe.pipe';
 
 interface CandidateApplication {
   id: number;
@@ -20,117 +19,137 @@ interface CandidateApplication {
 @Component({
   selector: 'app-employer-candidates',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SafePipe],
   template: `
     <div class="candidates-page animate-fade">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h2 class="fw-bold mb-1">Quản lý ứng viên</h2>
-          <p class="text-muted small">Theo dõi và phản hồi hồ sơ ứng tuyển từ các ứng viên</p>
-        </div>
-        <div class="actions-group d-flex gap-2">
-           <button class="btn btn-outline-secondary rounded-pill px-4" (click)="loadCandidates()">
-             <i class="bi bi-arrow-clockwise"></i> Làm mới
-           </button>
+          <p class="text-muted small">Xem và phản hồi hồ sơ ứng tuyển (Master-Detail)</p>
         </div>
       </div>
 
-      <!-- Filters Row -->
-      <div class="status-filters-card card-premium mb-4 p-3">
-        <div class="d-flex flex-wrap gap-2">
-          <button class="btn btn-filter" [class.active]="currentFilter() === 'All'" (click)="setFilter('All')">Tất cả</button>
-          <button class="btn btn-filter" [class.active]="currentFilter() === 'Pending'" (click)="setFilter('Pending')">Chưa xem</button>
-          <button class="btn btn-filter" [class.active]="currentFilter() === 'Accepted'" (click)="setFilter('Accepted')">Đã duyệt</button>
-          <button class="btn btn-filter" [class.active]="currentFilter() === 'Interview'" (click)="setFilter('Interview')">Hẹn phỏng vấn</button>
-          <button class="btn btn-filter" [class.active]="currentFilter() === 'Rejected'" (click)="setFilter('Rejected')">Đã từ chối</button>
-        </div>
-      </div>
+      <div class="row g-4 h-100">
+        <!-- Master Column (Left) -->
+        <div class="col-lg-4 d-flex flex-column gap-3">
+          <!-- Filters -->
+          <div class="status-filters-card card-premium p-3">
+            <div class="d-flex flex-wrap gap-2">
+              <button class="btn btn-filter" [class.active]="currentFilter() === 'All'" (click)="setFilter('All')">Tất cả</button>
+              <button class="btn btn-filter" [class.active]="currentFilter() === 'Pending'" (click)="setFilter('Pending')">Chưa xem</button>
+              <button class="btn btn-filter" [class.active]="currentFilter() === 'Viewed'" (click)="setFilter('Viewed')">Đã xem</button>
+              <button class="btn btn-filter" [class.active]="currentFilter() === 'Interview'" (click)="setFilter('Interview')">Phỏng vấn</button>
+              <button class="btn btn-filter" [class.active]="currentFilter() === 'Accepted'" (click)="setFilter('Accepted')">Đã duyệt</button>
+              <button class="btn btn-filter" [class.active]="currentFilter() === 'Rejected'" (click)="setFilter('Rejected')">Từ chối</button>
+            </div>
+          </div>
 
-      <!-- Candidates Table -->
-      <div class="table-container card-premium overflow-hidden">
-        <table class="table table-hover align-middle mb-0">
-          <thead class="bg-light">
-            <tr>
-              <th class="ps-4 py-3">Ứng viên</th>
-              <th class="py-3">Vị trí</th>
-              <th class="py-3">Ngày nộp</th>
-              <th class="py-3">CV</th>
-              <th class="py-3">Trạng thái</th>
-              <th class="pe-4 py-3 text-end">Hành động nhanh</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let app of filteredCandidates()" class="candidate-row hover-glow">
-              <td class="ps-4">
+          <!-- List -->
+          <div class="list-container card-premium flex-grow-1 overflow-auto" style="max-height: 700px;">
+            <div class="list-group list-group-flush">
+              <button *ngFor="let app of filteredCandidates()" 
+                      class="list-group-item list-group-item-action candidate-item hover-glow p-3 border-bottom"
+                      [class.active-item]="selectedCandidate()?.id === app.id"
+                      (click)="selectCandidate(app)">
                 <div class="d-flex align-items-center gap-3">
-                  <div class="avatar-sm bg-primary-light text-primary fw-bold">
+                  <div class="avatar-md bg-primary-light text-primary fw-bold fs-5">
                     {{ app.candidateName.charAt(0) }}
                   </div>
-                  <div>
-                    <div class="fw-bold text-main">{{ app.candidateName }}</div>
-                    <div class="text-muted smallest truncate-70">{{ app.message || 'Không có lời nhắn' }}</div>
+                  <div class="flex-grow-1 overflow-hidden text-start">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                      <h6 class="fw-bold mb-0 text-truncate" [class.text-white]="selectedCandidate()?.id === app.id">{{ app.candidateName }}</h6>
+                      <span class="small opacity-75" [class.text-white]="selectedCandidate()?.id === app.id">{{ app.appliedAt | date:'dd/MM' }}</span>
+                    </div>
+                    <div class="small text-truncate mb-2 opacity-75" [class.text-white]="selectedCandidate()?.id === app.id">{{ app.jobTitle }}</div>
+                    <span class="status-pill" [class]="app.status.toLowerCase()">{{ getStatusLabel(app.status) }}</span>
                   </div>
                 </div>
-              </td>
-              <td>
-                <span class="badge bg-soft-info text-info">{{ app.jobTitle }}</span>
-              </td>
-              <td>
-                <span class="text-muted small">{{ app.appliedAt | date:'dd/MM/yyyy' }}</span>
-              </td>
-              <td>
-                <a [href]="app.cvUrl" target="_blank" class="btn-view-cv text-primary">
-                  <i class="bi bi-file-earmark-pdf"></i> Xem CV
-                </a>
-              </td>
-              <td>
-                <span class="status-pill" [class]="app.status.toLowerCase()">
-                  {{ getStatusLabel(app.status) }}
-                </span>
-              </td>
-              <td class="pe-4 text-end">
-                <div class="quick-actions-box">
-                  <button class="btn-action approve" (click)="updateStatus(app.id, 'Accepted')" title="Duyệt">
-                    <i class="bi bi-check-lg"></i>
-                  </button>
-                  <button class="btn-action interview" (click)="updateStatus(app.id, 'Interview')" title="Hẹn phỏng vấn">
-                    <i class="bi bi-calendar-event"></i>
-                  </button>
-                  <button class="btn-action reject" (click)="updateStatus(app.id, 'Rejected')" title="Từ chối">
-                    <i class="bi bi-x-lg"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
+              </button>
 
-            <tr *ngIf="filteredCandidates().length === 0">
-              <td colspan="6" class="text-center py-5">
-                <div class="empty-state">
-                  <i class="bi bi-inbox text-muted display-4"></i>
-                  <p class="mt-3 text-muted">Không tìm thấy ứng viên nào phù hợp</p>
+              <div *ngIf="filteredCandidates().length === 0" class="p-4 text-center text-muted">
+                <i class="bi bi-inbox display-4 opacity-25"></i>
+                <p class="mt-2">Không có ứng viên nào</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detail Column (Right) -->
+        <div class="col-lg-8">
+          <div class="card-premium h-100 d-flex flex-column" *ngIf="selectedCandidate() as selected">
+            
+            <!-- Action Bar -->
+            <div class="action-bar p-3 border-bottom d-flex justify-content-between align-items-center bg-light rounded-top">
+              <div class="d-flex align-items-center gap-3">
+                <div class="avatar-sm bg-white text-primary fw-bold shadow-sm">
+                  {{ selected.candidateName.charAt(0) }}
                 </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                <div>
+                  <h5 class="fw-bold mb-0">{{ selected.candidateName }}</h5>
+                  <div class="text-muted small">Ứng tuyển: {{ selected.jobTitle }}</div>
+                </div>
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-primary shadow-sm hover-glow" (click)="updateStatus(selected.id, 'Accepted')">
+                  <i class="bi bi-check-circle me-1"></i> Duyệt
+                </button>
+                <button class="btn btn-info text-white shadow-sm hover-glow" (click)="updateStatus(selected.id, 'Interview')">
+                  <i class="bi bi-calendar-event me-1"></i> Phỏng vấn
+                </button>
+                <button class="btn btn-danger shadow-sm hover-glow" (click)="updateStatus(selected.id, 'Rejected')">
+                  <i class="bi bi-x-circle me-1"></i> Từ chối
+                </button>
+              </div>
+            </div>
+
+            <!-- Message Area -->
+            <div class="p-3 bg-white border-bottom" *ngIf="selected.message">
+              <p class="mb-0 text-muted"><strong>Lời nhắn: </strong> <i>"{{ selected.message }}"</i></p>
+            </div>
+
+            <!-- Embedded PDF Viewer -->
+            <div class="pdf-container flex-grow-1 bg-dark rounded-bottom overflow-hidden" style="min-height: 600px;">
+              <object [data]="selected.cvUrl | safe" type="application/pdf" width="100%" height="100%">
+                <p class="text-white text-center p-5">Trình duyệt của bạn không hỗ trợ xem PDF trực tiếp. 
+                  <a [href]="selected.cvUrl" class="text-primary" target="_blank">Tải xuống CV tại đây</a>.
+                </p>
+              </object>
+            </div>
+
+          </div>
+
+          <div class="card-premium h-100 d-flex align-items-center justify-content-center p-5 text-muted" *ngIf="!selectedCandidate()">
+            <div class="text-center">
+              <i class="bi bi-file-earmark-person display-1 opacity-25"></i>
+              <h4 class="mt-3">Chọn một ứng viên để xem chi tiết</h4>
+              <p>Danh sách bên trái chứa các hồ sơ đã nộp.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   `,
   styles: [`
+    .avatar-md { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
     .avatar-sm { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
     .bg-primary-light { background: #e0e7ff; }
-    .bg-soft-info { background: #e0f2fe; }
-    .text-info { color: #0369a1; }
-    .truncate-70 { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     .btn-filter {
-      border: 1px solid #e2e8f0; border-radius: 100px; padding: 6px 18px; font-size: 0.9rem; font-weight: 600; color: #64748b; background: white; transition: all 0.2s;
+      border: 1px solid #e2e8f0; border-radius: 100px; padding: 4px 12px; font-size: 0.85rem; font-weight: 600; color: #64748b; background: white; transition: all 0.2s;
       &.active { background: #2563eb; color: white; border-color: #2563eb; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); }
       &:hover:not(.active) { background: #f1f5f9; color: #2563eb; }
     }
 
+    .candidate-item {
+      transition: all 0.2s; cursor: pointer; border: none !important; margin-bottom: 2px;
+      &.active-item {
+        background: #3b82f6 !important; color: white !important; border-radius: 8px; transform: scale(1.02); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); z-index: 10;
+        .status-pill { border: 1px solid rgba(255,255,255,0.5); }
+      }
+    }
+
     .status-pill {
-      display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 100px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
       &.pending { background: #fef3c7; color: #92400e; }
       &.accepted { background: #dcfce7; color: #166534; }
       &.interview { background: #e0e7ff; color: #3730a3; }
@@ -138,23 +157,16 @@ interface CandidateApplication {
       &.viewed { background: #f3f4f6; color: #374151; }
     }
 
-    .quick-actions-box {
-      display: flex; gap: 8px; justify-content: flex-end;
-      .btn-action {
-        width: 32px; height: 32px; border-radius: 8px; border: none; display: flex; align-items: center; justify-content: center; transition: all 0.2s;
-        &.approve { background: #f0fdf4; color: #22c55e; &:hover { background: #22c55e; color: white; } }
-        &.interview { background: #f5f3ff; color: #8b5cf6; &:hover { background: #8b5cf6; color: white; } }
-        &.reject { background: #fef2f2; color: #ef4444; &:hover { background: #ef4444; color: white; } }
-      }
-    }
+    .pdf-container { position: relative; }
   `]
 })
 export class EmployerCandidatesComponent implements OnInit {
-  private http = inject(HttpClient);
+  private applicationService = inject(ApplicationService);
   private notification = inject(NotificationService);
 
   candidates = signal<CandidateApplication[]>([]);
   currentFilter = signal<string>('All');
+  selectedCandidate = signal<CandidateApplication | null>(null);
 
   filteredCandidates = computed(() => {
     const list = this.candidates();
@@ -168,24 +180,53 @@ export class EmployerCandidatesComponent implements OnInit {
   }
 
   loadCandidates() {
-    this.http.get<CandidateApplication[]>(`${API_BASE_URL}/api/applications/employer-all`).subscribe({
-      next: (res) => this.candidates.set(res),
+    this.applicationService.getEmployerApplications().subscribe({
+      next: (res) => {
+        this.candidates.set(res);
+        if (res.length > 0 && !this.selectedCandidate()) {
+          this.selectedCandidate.set(res[0]); // Auto select first
+        }
+      },
       error: () => this.notification.error('Không thể tải danh sách ứng viên')
     });
   }
 
   setFilter(filter: string) {
     this.currentFilter.set(filter);
+    const filtered = this.filteredCandidates();
+    if (filtered.length > 0) {
+      this.selectedCandidate.set(filtered[0]);
+    } else {
+      this.selectedCandidate.set(null);
+    }
   }
 
-  updateStatus(id: number, status: string) {
-    this.http.put(`${API_BASE_URL}/api/applications/${id}/status`, { status }).subscribe({
+  selectCandidate(app: CandidateApplication) {
+    this.selectedCandidate.set(app);
+    if (app.status === 'Pending') {
+      this.updateStatus(app.id, 'Viewed', false);
+    }
+  }
+
+  updateStatus(id: number, status: string, showNotify = true) {
+    this.applicationService.updateApplicationStatus(id, status).subscribe({
       next: () => {
-        this.notification.success(`Đã cập nhật trạng thái: ${this.getStatusLabel(status)}`);
-        // Cập nhật state tại chỗ dùng signal
-        this.candidates.update(list => list.map((c: CandidateApplication) => c.id === id ? { ...c, status } : c));
+        if (showNotify) {
+          this.notification.success(`Đã cập nhật trạng thái: ${this.getStatusLabel(status)}`);
+        }
+        
+        // Update Signal state
+        this.candidates.update(list => list.map(c => c.id === id ? { ...c, status } : c));
+        
+        // Update selected if needed
+        const selected = this.selectedCandidate();
+        if (selected && selected.id === id) {
+          this.selectedCandidate.set({ ...selected, status });
+        }
       },
-      error: () => this.notification.error('Lỗi cập nhật trạng thái')
+      error: () => {
+        if (showNotify) this.notification.error('Lỗi cập nhật trạng thái');
+      }
     });
   }
 
@@ -194,7 +235,7 @@ export class EmployerCandidatesComponent implements OnInit {
       'Pending': 'Chưa xem',
       'Viewed': 'Đã xem',
       'Accepted': 'Đã duyệt',
-      'Interview': 'Hẹn phỏng vấn',
+      'Interview': 'Phỏng vấn',
       'Rejected': 'Từ chối'
     };
     return map[status] || status;

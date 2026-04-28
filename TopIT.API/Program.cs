@@ -3,11 +3,14 @@ using Microsoft.Extensions.FileProviders;
 using TopIT.Infrastructure.Data;
 using TopIT.Core.Interfaces;
 using TopIT.Infrastructure.Repositories;
+using TopIT.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TopIT.Core.Mappings;
 using System.Text.Json.Serialization;
+using TopIT.API.Hubs;
+using TopIT.API.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,15 +22,29 @@ builder.Services.AddCors(options =>
         {
             policy.WithOrigins("http://localhost:4200") 
                   .AllowAnyHeader()
-                  .AllowAnyMethod();
+                  .AllowAnyMethod()
+                  .AllowCredentials();
         });
+});
+
+
+builder.Services.AddCors(options => {
+    options.AddPolicy("AllowAll", policy => {
+        policy.AllowAnyOrigin() 
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
 });
 
 builder.Services.AddScoped<IJobRepository, JobRepository>();
 builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IUserCVRepository, UserCVRepository>();
+builder.Services.AddScoped<IConsultationRequestRepository, ConsultationRequestRepository>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 
+builder.Services.AddSignalR();
 
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
 
@@ -42,7 +59,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuer = true,
             ValidIssuer = builder.Configuration.GetSection("Jwt:Issuer").Value,
             ValidateAudience = true,
-            ValidAudience = builder.Configuration.GetSection("Jwt:Audience").Value
+            ValidAudience = builder.Configuration.GetSection("Jwt:Audience").Value,
+            ValidateLifetime = true
         };
     });
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -61,6 +79,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+app.UseCors("AllowAll");
 
 if (app.Environment.IsDevelopment())
 {
@@ -80,5 +99,9 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<NotificationHub>("/notificationHub");
+
+// Seed Admin account if none exists
+await DataSeeder.SeedAdminAsync(app.Services);
 
 app.Run();

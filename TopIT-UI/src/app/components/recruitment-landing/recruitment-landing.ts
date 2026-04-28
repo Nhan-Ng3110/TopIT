@@ -39,14 +39,18 @@ export class RecruitmentLandingComponent {
 
     this.isSubmitting = true;
     
-    // Giả lập việc gửi yêu cầu và chuyển đổi role thành Employer cho demo
-    // Trong thực tế sẽ gọi API và đợi tư vấn viên duyệt hoặc chuyển role
-    setTimeout(() => {
-      this.notification.success('Yêu cầu đã được gửi! Chúng tôi sẽ liên hệ sớm nhất.');
-      
-      // Demo logic: Tự động chuyển role Employer cho user hiện tại (giả định đã login)
-      // Nếu chưa login thì redirect qua login với param là employer
-      this.router.navigate(['/jobs']); 
-    }, 1500);
+    // Gọi API để tạo Yêu cầu tư vấn
+    this.http.post('https://localhost:7151/api/ConsultationRequests', this.formData).subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        this.notification.success('Yêu cầu đã được gửi! Chúng tôi sẽ liên hệ trong thời gian sớm nhất.');
+        this.router.navigate(['/thank-you']);
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        this.notification.error(err.error?.message || 'Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại.');
+        console.error(err);
+      }
+    });
   }
 }
