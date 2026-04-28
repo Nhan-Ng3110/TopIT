@@ -61,7 +61,7 @@ Client[Client Side Angular SPA] -->|HTTP REST API| Gateway[ASP.NET Core Web API]
 
 - [x] Đăng ký / Đăng nhập
 - [x] Quản lý hồ sơ cá nhân (Profile)
-- [x]Tìm kiếm việc làm theo kỹ năng, từ khóa, mức lương
+- [x] Tìm kiếm việc làm theo kỹ năng, từ khóa, mức lương
 - [x] Ứng tuyển và theo dõi trạng thái hồ sơ
 - [ ] Tạo CV trực tuyến (CV Builder)
 
