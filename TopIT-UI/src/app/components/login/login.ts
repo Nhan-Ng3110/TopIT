@@ -23,6 +23,8 @@ export class LoginComponent {
     password: ''
   };
 
+  showPassword = false;
+
   onLogin() {
     this.authService.login(this.loginData).subscribe({
       next: (res: any) => {

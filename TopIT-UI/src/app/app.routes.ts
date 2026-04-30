@@ -36,14 +36,14 @@ export const routes: Routes = [
 
   { 
     path: 'employer', 
-    loadComponent: () => import('./components/employer/dashboard/dashboard').then(m => m.EmployerDashboardComponent),
+    loadComponent: () => import('./components/employer/layout/layout').then(m => m.EmployerLayoutComponent),
     canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', loadComponent: () => import('./components/job-list/job-list').then(m => m.JobListComponent) },
       { path: 'jobs', loadComponent: () => import('./components/employer/jobs/jobs').then(m => m.EmployerJobsComponent) },
       { path: 'candidates', loadComponent: () => import('./components/employer/candidates/candidates').then(m => m.EmployerCandidatesComponent) },
-      { path: 'company', loadComponent: () => import('./components/employer/company/company').then(m => m.EmployerCompanyComponent) }
+      { path: 'company', loadComponent: () => import('./components/employer/company/company').then(m => m.CompanyProfileComponent) }
     ]
   }
 ];

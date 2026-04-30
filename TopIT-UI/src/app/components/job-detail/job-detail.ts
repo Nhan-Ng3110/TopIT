@@ -30,6 +30,13 @@ export class JobDetailComponent implements OnInit {
   selectedCvId: number | null = null;
   selectedCvPath: string = '';
   applyMessage: string = '';
+  
+  applyForm = {
+    fullName: '',
+    phone: '',
+    email: ''
+  };
+  wordCount: number = 0;
 
   // Lưu thông tin đơn ứng tuyển cũ (nếu có)
   existingApplication: any = null;
@@ -71,6 +78,12 @@ export class JobDetailComponent implements OnInit {
       return;
     }
 
+    // Pre-fill user data if possible
+    const userName = this.authService.getUserNameFromToken();
+    if (userName) {
+      this.applyForm.fullName = userName;
+    }
+
     this.loadUserCvs();
   }
 
@@ -97,6 +110,7 @@ export class JobDetailComponent implements OnInit {
 
           // Pre-fill lời nhắn cũ
           this.applyMessage = oldMessage;
+          this.updateWordCount();
         }
 
         this.showApplyModal = true;
@@ -115,10 +129,15 @@ export class JobDetailComponent implements OnInit {
     this.selectedCvPath = urlParts[urlParts.length - 1];
   }
 
+  updateWordCount() {
+    this.wordCount = this.applyMessage.trim() ? this.applyMessage.trim().split(/\s+/).length : 0;
+  }
+
   closeModal() {
     this.showApplyModal = false;
     this.selectedCvId = null;
     this.applyMessage = '';
+    this.wordCount = 0;
   }
 
   submitApplication() {

@@ -10,6 +10,18 @@ export interface UserCV {
   isDefault: boolean;
 }
 
+export interface ParsedCvData {
+  fullName: string;
+  email: string;
+  phone: string;
+  summary: string;
+  technicalSkills: string;
+  softSkills: string;
+  experiences: any[];
+  educations: any[];
+  projects: any[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -33,5 +45,11 @@ export class UserCvService {
 
   setDefault(id: number): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}/set-default`, {});
+  }
+
+  parseCV(file: File): Observable<ParsedCvData> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<ParsedCvData>(`${this.apiUrl}/parse`, formData);
   }
 }

@@ -1,13 +1,13 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { NotificationService } from '../../../services/notification';
 import { FormsModule } from '@angular/forms';
 
 const API_BASE_URL = 'https://localhost:7151';
 
 @Component({
-  selector: 'app-employer-company',
+  selector: 'app-company-profile',
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
@@ -76,7 +76,10 @@ const API_BASE_URL = 'https://localhost:7151';
                   <div class="logo-preview-box">
                      <img [src]="company().logoUrl || 'assets/default-company.png'" alt="Logo">
                   </div>
-                  <button class="btn btn-outline-secondary btn-sm rounded-pill">Tải lên Logo</button>
+                  <div>
+                    <label for="logoUpload" class="btn btn-outline-secondary btn-sm rounded-pill">Tải lên Logo</label>
+                    <input type="file" id="logoUpload" class="d-none" (change)="onFileSelected($event, 'logo')">
+                  </div>
                </div>
             </div>
           </div>
@@ -101,7 +104,7 @@ const API_BASE_URL = 'https://localhost:7151';
     }
   `]
 })
-export class EmployerCompanyComponent implements OnInit {
+export class CompanyProfileComponent implements OnInit {
   private http = inject(HttpClient);
   private notification = inject(NotificationService);
 
@@ -122,7 +125,9 @@ export class EmployerCompanyComponent implements OnInit {
   }
 
   loadCompany() {
-    this.http.get(`${API_BASE_URL}/api/companies/my-company`).subscribe({
+    const token = localStorage.getItem('topit_token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    this.http.get(`${API_BASE_URL}/api/companies/profile`, { headers }).subscribe({
       next: (res: any) => this.company.set(res),
       error: () => this.notification.error('Không thể tải thông tin công ty')
     });
@@ -130,7 +135,9 @@ export class EmployerCompanyComponent implements OnInit {
 
   saveInfo() {
     this.isSaving.set(true);
-    this.http.put(`${API_BASE_URL}/api/companies/update`, this.company()).subscribe({
+    const token = localStorage.getItem('topit_token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    this.http.put(`${API_BASE_URL}/api/companies/profile`, this.company(), { headers }).subscribe({
       next: () => {
         this.notification.success('Đã cập nhật thông tin công ty');
         this.isSaving.set(false);
@@ -149,12 +156,16 @@ export class EmployerCompanyComponent implements OnInit {
       formData.append('file', file);
 
       const endpoint = type === 'cover' ? '/api/companies/upload-cover' : '/api/companies/upload-logo';
+      const token = localStorage.getItem('topit_token');
       
-      this.http.post(`${API_BASE_URL}${endpoint}`, formData).subscribe({
+      const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+      this.http.post(`${API_BASE_URL}${endpoint}`, formData, { headers }).subscribe({
         next: (res: any) => {
           this.notification.success('Tải ảnh lên thành công');
           if (type === 'cover') {
             this.company.update(c => ({ ...c, coverUrl: res.coverUrl }));
+          } else if (type === 'logo') {
+            this.company.update(c => ({ ...c, logoUrl: res.logoUrl }));
           }
         },
         error: () => this.notification.error('Lỗi khi tải ảnh lên')

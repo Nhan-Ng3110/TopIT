@@ -36,6 +36,7 @@
         </div>
 
         <div class="sub-tabs mb-4">
+          <button class="sub-tab-item" [class.active]="activeSubTab() === 'builder'" (click)="setSubTab('builder')">Hồ sơ TopIT</button>
           <button class="sub-tab-item" [class.active]="activeSubTab() === 'cvs'" (click)="setSubTab('cvs')">Danh sách hồ sơ</button>
           <button class="sub-tab-item" [class.active]="activeSubTab() === 'applied'" (click)="setSubTab('applied')">Việc làm đã ứng tuyển</button>
           <button class="sub-tab-item" [class.active]="activeSubTab() === 'saved'" (click)="setSubTab('saved')">Việc làm đã lưu</button>
@@ -49,9 +50,156 @@
             <div class="spinner-border text-primary" role="status"></div>
           </div>
 
+          <!-- AI Converting Overlay -->
+          <div class="loading-overlay flex-column gap-2" *ngIf="isConverting" style="z-index: 200; background: rgba(255,255,255,0.92); backdrop-filter: blur(4px);">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+            <p class="fw-bold text-primary mb-0" style="font-size: 1rem;">AI đang phân tích hồ sơ của bạn...</p>
+            <p class="text-muted small mb-0">Quá trình này có thể mất vài giây.</p>
+          </div>
+
           <!-- LỰA CHỌN NỘI DUNG THEO TAB -->
           <ng-container [ngSwitch]="activeSubTab()">
             
+            <!-- TAB: TOPIT CV BUILDER -->
+            <div *ngSwitchCase="'builder'">
+              <div class="builder-toolbar d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                <div class="builder-banner d-none d-md-block">
+                  <img src="assets/images/banner-builder.png" alt="Banner" class="img-fluid rounded-3" style="max-height: 80px; object-fit: cover; width: 100%;">
+                </div>
+                <div class="builder-actions ms-auto d-flex gap-2">
+                  <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" (click)="openImportModal()">
+                    Tải lên CV (Import) <i class="bi bi-cloud-upload ms-1"></i>
+                  </button>
+                  <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold">
+                    Lưu CV <i class="bi bi-download ms-1"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="cv-builder-canvas">
+                <!-- Personal Info Header -->
+                <div class="cv-header mb-4 border-bottom pb-4">
+                  <input type="text" class="form-control cv-name-input text-primary fw-bold mb-3 border-0 bg-transparent px-0 fs-2" 
+                         [(ngModel)]="cvBuilderData.fullName" placeholder="Họ và tên của bạn">
+                  <div class="cv-contact-info d-flex flex-wrap gap-3 text-muted small align-items-center">
+                    <span class="d-flex align-items-center"><i class="bi bi-geo-alt-fill me-1"></i> 
+                      <input type="text" class="form-control form-control-sm border-0 bg-transparent" [(ngModel)]="cvBuilderData.address" placeholder="Địa chỉ"></span>
+                    <span class="d-flex align-items-center"><i class="bi bi-envelope-fill me-1"></i> 
+                      <input type="text" class="form-control form-control-sm border-0 bg-transparent" [(ngModel)]="cvBuilderData.email" placeholder="Email"></span>
+                    <span class="d-flex align-items-center"><i class="bi bi-telephone-fill me-1"></i> 
+                      <input type="text" class="form-control form-control-sm border-0 bg-transparent" [(ngModel)]="cvBuilderData.phone" placeholder="Số điện thoại"></span>
+                    <span class="d-flex align-items-center"><i class="bi bi-linkedin me-1"></i> 
+                      <input type="text" class="form-control form-control-sm border-0 bg-transparent" [(ngModel)]="cvBuilderData.linkedIn" placeholder="LinkedIn"></span>
+                    <span class="d-flex align-items-center"><i class="bi bi-github me-1"></i> 
+                      <input type="text" class="form-control form-control-sm border-0 bg-transparent" [(ngModel)]="cvBuilderData.github" placeholder="GitHub"></span>
+                  </div>
+                </div>
+
+                <!-- Sections -->
+                <div class="cv-section mb-4">
+                  <h4 class="section-title text-uppercase fw-bold text-primary mb-3">TÓM TẮT (SUMMARY)</h4>
+                  <div class="section-content p-3 bg-light rounded-3 border">
+                    <textarea class="form-control border-0 bg-transparent resize-none p-0" rows="3" [(ngModel)]="cvBuilderData.summary" placeholder="Nhấn để thêm tóm tắt"></textarea>
+                  </div>
+                </div>
+
+                <div class="cv-section mb-4">
+                  <h4 class="section-title text-uppercase fw-bold text-primary mb-3">KỸ NĂNG</h4>
+                  <div class="section-content p-3 bg-light rounded-3 border">
+                    <div class="mb-3">
+                      <h6 class="text-uppercase text-secondary fw-bold small mb-1">Kỹ năng chuyên môn</h6>
+                      <textarea class="form-control border-0 bg-transparent resize-none p-0" rows="4" [(ngModel)]="cvBuilderData.technicalSkills" placeholder="Nhập kỹ năng..."></textarea>
+                    </div>
+                    <div>
+                      <h6 class="text-uppercase text-secondary fw-bold small mb-1">Kỹ năng mềm (Không bắt buộc)</h6>
+                      <textarea class="form-control border-0 bg-transparent resize-none p-0" rows="2" [(ngModel)]="cvBuilderData.softSkills" placeholder="Nhập soft skill..."></textarea>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="cv-section mb-4">
+                  <h4 class="section-title text-uppercase fw-bold text-primary mb-3">KINH NGHIỆM LÀM VIỆC</h4>
+                  <div class="section-content p-3 bg-light rounded-3 border">
+                    @if (cvBuilderData.experiences.length === 0) {
+                      <p class="mb-0 text-muted cursor-pointer">Nhấn để thêm kinh nghiệm làm việc</p>
+                    } @else {
+                      @for (exp of cvBuilderData.experiences; track exp.company) {
+                        <div class="experience-item mb-3 last-mb-0">
+                          <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                              <h6 class="fw-bold mb-1"><i class="bi bi-building me-2 text-primary"></i>{{ exp.company }}</h6>
+                              <span class="text-muted small">{{ exp.duration }}</span>
+                            </div>
+                            <button class="btn btn-sm text-muted"><i class="bi bi-trash"></i></button>
+                          </div>
+                          <div class="text-muted small ps-4" style="white-space: pre-line;">{{ exp.description }}</div>
+                        </div>
+                      }
+                    }
+                  </div>
+                </div>
+
+                <div class="cv-section mb-4">
+                  <h4 class="section-title text-uppercase fw-bold text-primary mb-3">HỌC VẤN</h4>
+                  <div class="section-content p-3 bg-light rounded-3 border">
+                    @if (cvBuilderData.educations.length === 0) {
+                      <p class="mb-0 text-muted cursor-pointer">Nhấn để thêm học vấn</p>
+                    } @else {
+                      @for (edu of cvBuilderData.educations; track edu.school) {
+                        <div class="education-item mb-3 last-mb-0">
+                          <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                              <h6 class="fw-bold mb-1"><i class="bi bi-mortarboard me-2 text-primary"></i>{{ edu.school }}</h6>
+                              <div class="text-primary small mb-1">{{ edu.major }}</div>
+                              <span class="text-muted small">{{ edu.duration }}</span>
+                            </div>
+                            <button class="btn btn-sm text-muted"><i class="bi bi-trash"></i></button>
+                          </div>
+                          <div class="text-muted small ps-4">{{ edu.description }}</div>
+                        </div>
+                      }
+                    }
+                  </div>
+                </div>
+
+                <div class="cv-section mb-4">
+                  <h4 class="section-title text-uppercase fw-bold text-primary mb-3">NGOẠI NGỮ</h4>
+                  <div class="section-content p-3 bg-light rounded-3 border">
+                    <textarea class="form-control border-0 bg-transparent resize-none p-0" rows="2" [(ngModel)]="cvBuilderData.languages" placeholder="Chưa có thông tin ngoại ngữ."></textarea>
+                  </div>
+                </div>
+
+                <div class="cv-section mb-4">
+                  <h4 class="section-title text-uppercase fw-bold text-primary mb-3">DỰ ÁN</h4>
+                  <div class="section-content p-3 bg-light rounded-3 border">
+                    @if (cvBuilderData.projects.length === 0) {
+                      <p class="mb-0 text-muted cursor-pointer">Nhấn để thêm dự án</p>
+                    } @else {
+                      @for (prj of cvBuilderData.projects; track prj.name) {
+                        <div class="project-item mb-3 last-mb-0">
+                          <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                              <h6 class="fw-bold mb-1"><i class="bi bi-laptop me-2 text-primary"></i>{{ prj.name }}</h6>
+                              <span class="text-muted small">{{ prj.duration }}</span>
+                            </div>
+                            <button class="btn btn-sm text-muted"><i class="bi bi-trash"></i></button>
+                          </div>
+                          <div class="text-muted small ps-4" style="white-space: pre-line;">{{ prj.description }}</div>
+                        </div>
+                      }
+                    }
+                  </div>
+                </div>
+
+                <div class="cv-section mb-4">
+                  <h4 class="section-title text-uppercase fw-bold text-primary mb-3">SỞ THÍCH</h4>
+                  <div class="section-content p-3 bg-light rounded-3 border">
+                    <textarea class="form-control border-0 bg-transparent resize-none p-0" rows="2" [(ngModel)]="cvBuilderData.hobbies" placeholder="Nhấn để thêm sở thích"></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- TAB: DANH SÁCH CV -->
             <div *ngSwitchCase="'cvs'">
               <h4 class="fw-bold text-gradient mb-3">Chọn CV chính để hiển thị với nhà tuyển dụng</h4>
@@ -215,3 +363,51 @@
     <a routerLink="/jobs" class="btn btn-primary rounded-pill px-4 py-2 fw-bold hover-glow">Khám phá ngay</a>
   </div>
 </ng-template>
+
+<!-- IMPORT CV MODAL -->
+<div class="import-cv-overlay" *ngIf="isImportModalOpen">
+  <div class="import-cv-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h4 class="modal-title fw-bold">Import CV</h4>
+        <p class="text-muted small mb-0">Chọn CV có sẵn hoặc upload CV mới để convert</p>
+      </div>
+      <button class="btn-close" (click)="closeImportModal()"></button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Upload New CV Zone -->
+      <div class="upload-zone mb-4">
+        <p class="fw-bold mb-2 small text-muted">Upload CV mới (PDF)</p>
+        <div class="drop-zone border rounded-3 p-4 text-center bg-primary-soft border-primary-soft cursor-pointer transition-all hover-glow" (click)="importFileInput.click()">
+          <i class="bi bi-cloud-arrow-up-fill text-primary fs-1 mb-2 d-block"></i>
+          <h6 class="fw-bold text-dark">Kéo thả file CV vào đây hoặc <span class="text-primary">chọn file</span></h6>
+          <p class="text-muted small mb-0">Chỉ chấp nhận file PDF</p>
+          <input type="file" #importFileInput hidden (change)="onImportFileSelected($event)" accept=".pdf">
+        </div>
+      </div>
+
+      <hr class="my-4 text-muted opacity-25">
+
+      <!-- Existing CVs -->
+      <div class="existing-cvs-zone">
+        <p class="fw-bold mb-3 small text-muted">CV có sẵn</p>
+        <div class="cv-list">
+          @if (cvs().length === 0) {
+            <div class="text-muted small text-center p-3 border rounded bg-light">Không có CV nào trên hệ thống.</div>
+          } @else {
+            @for (cv of cvs(); track cv.id) {
+              <div class="cv-item-border d-flex justify-content-between align-items-center p-3 border rounded-3 mb-2">
+                <div>
+                  <div class="text-main fw-bold small text-truncate" style="max-width: 250px;">{{ cv.fileName }}</div>
+                  <div class="text-muted smallest">{{ cv.uploadDate | date:'HH:mm dd/MM/yyyy' }}</div>
+                </div>
+                <button class="btn btn-primary btn-sm px-3 fw-bold" (click)="convertCv(cv.id)">Convert</button>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

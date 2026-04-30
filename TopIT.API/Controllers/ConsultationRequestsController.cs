@@ -13,15 +13,18 @@ namespace TopIT.API.Controllers
         private readonly IConsultationRequestRepository _consultationRepo;
         private readonly IEmailService _emailService;
         private readonly IAuthRepository _authRepo;
+        private readonly TopIT.Infrastructure.Data.AppDbContext _context;
 
         public ConsultationRequestsController(
             IConsultationRequestRepository consultationRepo,
             IEmailService emailService,
-            IAuthRepository authRepo)
+            IAuthRepository authRepo,
+            TopIT.Infrastructure.Data.AppDbContext context)
         {
             _consultationRepo = consultationRepo;
             _emailService = emailService;
             _authRepo = authRepo;
+            _context = context;
         }
 
         [HttpPost]
@@ -68,12 +71,24 @@ namespace TopIT.API.Controllers
                     return BadRequest(new { message = "Yêu cầu này đã được xử lý" });
 
                 // Check user
+                // 1. Tạo công ty mới từ thông tin yêu cầu
+                var newCompany = new Company
+                {
+                    Name = request.CompanyName,
+                    Address = "Đang cập nhật..." // Sẽ được Employer cập nhật sau
+                };
+                await _context.Companies.AddAsync(newCompany);
+                await _context.SaveChangesAsync();
+
+                // 2. Cập nhật hoặc tạo User và gán CompanyId
                 var existingUser = await _authRepo.GetUserByEmail(request.Email);
                 string generatedPassword = null;
 
                 if (existingUser != null)
                 {
-                    await _authRepo.UpdateUserRole(existingUser, "Employer");
+                    existingUser.Role = "Employer";
+                    existingUser.CompanyId = newCompany.Id;
+                    _context.Users.Update(existingUser);
                 }
                 else
                 {
@@ -82,7 +97,8 @@ namespace TopIT.API.Controllers
                     {
                         FullName = request.Name,
                         Email = request.Email,
-                        Role = "Employer"
+                        Role = "Employer",
+                        CompanyId = newCompany.Id
                     };
                     await _authRepo.Register(newUser, generatedPassword);
                 }

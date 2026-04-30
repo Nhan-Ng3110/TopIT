@@ -36,6 +36,17 @@ export class JobListComponent implements OnInit {
   userCVs = signal<UserCV[]>([]);
   selectedCVForApply: UserCV | null = null;
 
+  applyForm = {
+    fullName: '',
+    phone: '',
+    email: ''
+  };
+  wordCount: number = 0;
+
+  get applyingJob() {
+    return this.jobs().find(j => j.id === this.applyingJobId) || null;
+  }
+
   // --- LOCATION DATA ---
   provinces = [
     { id: 1, name: 'Hà Nội' },
@@ -246,6 +257,10 @@ export class JobListComponent implements OnInit {
       return;
     }
 
+    // Pre-fill user data
+    const userName = this.authService.getUserNameFromToken();
+    if (userName) this.applyForm.fullName = userName;
+
     this.applyingJobId = jobId;
     const currentJob = this.jobs().find(j => j.id === jobId);
     
@@ -264,6 +279,7 @@ export class JobListComponent implements OnInit {
               if (existing) {
                 const oldCvPath = existing.cvPath || existing.CVPath;
                 this.applyMessage = existing.message || existing.Message || '';
+                this.updateWordCount();
                 
                 const matchedCv = cvs.find(c => {
                    const urlParts = c.fileUrl?.split('/') ?? [];
@@ -276,6 +292,7 @@ export class JobListComponent implements OnInit {
           } else {
             this.selectedCVForApply = cvs.find(c => c.isDefault) || cvs[0];
             this.applyMessage = '';
+            this.wordCount = 0;
           }
         } else {
           this.notificationService.info('Bạn chưa có bản CV nào trong hệ thống. Vui lòng tải lên CV trước khi ứng tuyển.', 'Thiếu CV');
@@ -284,6 +301,10 @@ export class JobListComponent implements OnInit {
       },
       error: () => this.notificationService.error('Có lỗi khi kiểm tra hồ sơ của bạn.')
     });
+  }
+
+  updateWordCount() {
+    this.wordCount = this.applyMessage.trim() ? this.applyMessage.trim().split(/\s+/).length : 0;
   }
 
   onSelectCvToApply(cv: UserCV) {

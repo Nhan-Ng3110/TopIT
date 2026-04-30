@@ -21,8 +21,8 @@ namespace TopIT.API.Controllers
         }
 
         [Authorize(Roles = "Employer")]
-        [HttpGet("my-company")]
-        public async Task<IActionResult> GetMyCompany()
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetCompanyProfile()
         {
             var companyIdClaim = User.FindFirst("CompanyId")?.Value;
             if (string.IsNullOrEmpty(companyIdClaim)) return BadRequest("Tài khoản chưa liên kết công ty.");
@@ -52,7 +52,7 @@ namespace TopIT.API.Controllers
             if (file == null || file.Length == 0) return BadRequest("File không hợp lệ.");
 
             var companyIdClaim = User.FindFirst("CompanyId")?.Value;
-            if (string.IsNullOrEmpty(companyIdClaim)) return Unauthorized();
+            if (string.IsNullOrEmpty(companyIdClaim)) return BadRequest("Tài khoản chưa được liên kết với công ty nào.");
             int companyId = int.Parse(companyIdClaim);
 
             var company = await _context.Companies.FindAsync(companyId);
@@ -77,11 +77,42 @@ namespace TopIT.API.Controllers
         }
 
         [Authorize(Roles = "Employer")]
-        [HttpPut("update")]
-        public async Task<IActionResult> UpdateCompany([FromBody] Company updateDto)
+        [HttpPost("upload-logo")]
+        public async Task<IActionResult> UploadLogo(IFormFile file)
+        {
+            if (file == null || file.Length == 0) return BadRequest("File không hợp lệ.");
+
+            var companyIdClaim = User.FindFirst("CompanyId")?.Value;
+            if (string.IsNullOrEmpty(companyIdClaim)) return BadRequest("Tài khoản chưa được liên kết với công ty nào.");
+            int companyId = int.Parse(companyIdClaim);
+
+            var company = await _context.Companies.FindAsync(companyId);
+            if (company == null) return NotFound();
+
+            string uploadsFolder = Path.Combine(_env.ContentRootPath, "uploads", "logos");
+            if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+            string uniqueFileName = $"logo_{companyId}_{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(fileStream);
+            }
+
+            company.LogoPath = uniqueFileName;
+            await _context.SaveChangesAsync();
+
+            var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+            return Ok(new { logoUrl = $"{baseUrl}/uploads/logos/{uniqueFileName}" });
+        }
+
+        [Authorize(Roles = "Employer")]
+        [HttpPut("profile")]
+        public async Task<IActionResult> UpdateCompanyProfile([FromBody] Company updateDto)
         {
             var companyIdClaim = User.FindFirst("CompanyId")?.Value;
-            if (string.IsNullOrEmpty(companyIdClaim)) return Unauthorized();
+            if (string.IsNullOrEmpty(companyIdClaim)) return BadRequest("Tài khoản chưa được liên kết với công ty nào.");
             int companyId = int.Parse(companyIdClaim);
 
             var company = await _context.Companies.FindAsync(companyId);

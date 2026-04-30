@@ -1,17 +1,52 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
-import { UserCvService, UserCV } from '../../services/user-cv.service';
+import { UserCvService, UserCV, ParsedCvData } from '../../services/user-cv.service';
 import { ApplicationService } from '../../services/application';
 import { JobService } from '../../services/job';
 import { AuthService } from '../../services/auth';
 import { NotificationService } from '../../services/notification';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
+export interface TopItCVData {
+  fullName: string;
+  address: string;
+  phone: string;
+  email: string;
+  linkedIn: string;
+  github: string;
+  summary: string;
+  technicalSkills: string;
+  softSkills: string;
+  experiences: {
+    company: string;
+    position: string;
+    duration: string;
+    description: string;
+  }[];
+  educations: {
+    school: string;
+    major: string;
+    duration: string;
+    description: string;
+  }[];
+  projects: {
+    name: string;
+    duration: string;
+    description: string;
+  }[];
+  languages: string;
+  hobbies: string;
+  certificates: string;
+  references: string;
+  activities: string;
+  otherInformation: string;
+}
 @Component({
   selector: 'app-cv-management',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './cv-management.html',
   styleUrl: './cv-management.scss'
 })
@@ -23,10 +58,35 @@ export class CvManagementComponent implements OnInit {
   private notificationService = inject(NotificationService);
   private sanitizer = inject(DomSanitizer);
   private route = inject(ActivatedRoute);
+  private cdr = inject(ChangeDetectorRef);
 
   // Management State
   activeSubTab = signal<string>('cvs');
   loading = signal<boolean>(false);
+
+  // TopIT CV Builder State
+  isImportModalOpen = false;
+  isConverting = false;
+  cvBuilderData: TopItCVData = {
+    fullName: '',
+    address: '',
+    phone: '',
+    email: '',
+    linkedIn: '',
+    github: '',
+    summary: '',
+    technicalSkills: '',
+    softSkills: '',
+    experiences: [],
+    educations: [],
+    projects: [],
+    languages: '',
+    hobbies: '',
+    certificates: '',
+    references: '',
+    activities: '',
+    otherInformation: ''
+  };
 
   // Data Signals
   cvs = signal<UserCV[]>([]);
@@ -45,7 +105,7 @@ export class CvManagementComponent implements OnInit {
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       const tab = params['tab'];
-      if (tab && ['cvs', 'applied', 'saved', 'viewed'].includes(tab)) {
+      if (tab && ['builder', 'cvs', 'applied', 'saved', 'viewed'].includes(tab)) {
         this.activeSubTab.set(tab);
       }
       this.loadData();
@@ -54,6 +114,7 @@ export class CvManagementComponent implements OnInit {
 
   loadData() {
     const tab = this.activeSubTab();
+    if (tab === 'builder') return; // Tab CV builder không cần load dữ liệu
     if (tab === 'cvs') this.loadCVs();
     else this.loadJobsData(tab);
   }
@@ -192,5 +253,76 @@ export class CvManagementComponent implements OnInit {
   closePreview() {
     this.isPreviewModalOpen = false;
     this.safeCvUrl = null;
+  }
+
+  // --- IMPORT CV LOGIC ---
+  openImportModal() {
+    this.isImportModalOpen = true;
+    // Load CVs if not already loaded so user can select existing ones
+    if (this.cvs().length === 0) {
+      this.loadCVs();
+    }
+  }
+
+  closeImportModal() {
+    this.isImportModalOpen = false;
+  }
+
+  onImportFileSelected(event: any) {
+    const file: File = event.target.files[0];
+    if (!file) return;
+    this.callParseApi(file);
+  }
+
+  convertCv(cvId: number) {
+    // Tìm CV trong danh sách
+    const cv = this.cvs().find(c => c.id === cvId);
+    if (!cv) return;
+
+    // Tải file từ URL về dưới dạng Blob rồi convert sang File
+    this.isConverting = true;
+    this.closeImportModal();
+    fetch(cv.fileUrl)
+      .then(r => r.blob())
+      .then(blob => {
+        const file = new File([blob], cv.fileName, { type: 'application/pdf' });
+        this.callParseApi(file);
+      })
+      .catch(() => {
+        this.isConverting = false;
+        this.cdr.detectChanges();
+        this.notificationService.error('Không thể tải file CV. Vui lòng thử tải lên file PDF từ máy tính.');
+      });
+  }
+
+  private callParseApi(file: File) {
+    this.isConverting = true;
+    this.isImportModalOpen = false;
+    this.cdr.detectChanges();
+
+    this.cvService.parseCV(file).subscribe({
+      next: (result: ParsedCvData) => {
+        this.cvBuilderData.fullName = result.fullName || '';
+        this.cvBuilderData.email = result.email || '';
+        this.cvBuilderData.phone = result.phone || '';
+        this.cvBuilderData.summary = result.summary || '';
+        this.cvBuilderData.technicalSkills = result.technicalSkills || '';
+        this.cvBuilderData.softSkills = result.softSkills || '';
+        this.cvBuilderData.experiences = result.experiences || [];
+        this.cvBuilderData.educations = result.educations || [];
+        this.cvBuilderData.projects = result.projects || [];
+        this.isConverting = false;
+        this.cdr.detectChanges();
+        this.notificationService.success('AI đã phân tích xong! Vui lòng kiểm tra và bổ sung thêm thông tin còn thiếu.');
+        // Chuyển sang tab builder
+        this.activeSubTab.set('builder');
+      },
+      error: (err) => {
+        this.isConverting = false;
+        this.cdr.detectChanges();
+        const msg = err.error?.message || 'Đã xảy ra lỗi khi phân tích CV. Vui lòng thử lại.';
+        this.notificationService.error(msg);
+      }
+    });
   }
 }

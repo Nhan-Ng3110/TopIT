@@ -400,60 +400,95 @@
 
   <!-- Premium CV Selection Modal (Apply with stored CV) -->
   <div class="apply-modal-overlay" *ngIf="isApplySelectionModalOpen">
-    <div class="card-premium apply-modal-card animate-slide-up">
-      <div class="modal-header-premium border-bottom pb-3 mb-4 d-flex justify-content-between align-items-center">
-        <h4 class="m-0 fw-bold text-gradient">Chọn CV ứng tuyển</h4>
-        <button class="btn btn-link text-muted p-0 fs-4" (click)="isApplySelectionModalOpen = false">
-          <i class="bi bi-x-lg"></i>
-        </button>
-      </div>
-
-      <div class="modal-body-premium text-start">
-        <!-- Info banner khi đang cập nhật đơn cũ -->
-        <div class="modal-info-banner mb-3" *ngIf="jobs().find(j => j.id === applyingJobId)?.isApplied">
-          <i class="bi bi-info-circle-fill me-2"></i>
-          <span>Hệ thống đã ghi nhận đơn ứng tuyển cũ của bạn. Bạn có thể chỉnh sửa và lưu lại.</span>
+    <div class="apply-modal custom-apply-modal animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="modal-header-custom">
+        <div class="header-text">
+          <p class="subtitle">Bạn đang ứng tuyển vị trí</p>
+          <h2 class="title" *ngIf="applyingJob as job">
+            <span class="job-title-blue">{{ job.title }}</span> tại {{ job.company?.name }}
+          </h2>
         </div>
-
-        <div class="mb-4">
-          <label class="form-label fw-bold text-muted small text-uppercase mb-3">Chọn bản CV bạn muốn dùng</label>
-          <div class="cv-selection-list d-flex flex-column gap-2 max-height-300 overflow-auto pr-2">
-            @for (cv of userCVs(); track cv.id) {
-              <div class="cv-selection-item p-3 border rounded-4 d-flex align-items-center justify-content-between cursor-pointer transition-all"
-                   [class.is-selected]="selectedCVForApply?.id === cv.id"
-                   (click)="onSelectCvToApply(cv)">
-                <div class="d-flex align-items-center gap-3">
-                  <div class="form-check mb-0">
-                    <input class="form-check-input" type="radio" [checked]="selectedCVForApply?.id === cv.id">
-                  </div>
-                  <div>
-                    <div class="fw-bold text-main small">{{ cv.fileName }}</div>
-                    <div class="text-muted smallest">{{ cv.uploadDate | date:'dd/MM/yyyy' }}</div>
-                  </div>
-                </div>
-                @if (cv.isDefault) {
-                  <span class="badge bg-primary-soft text-primary rounded-pill smallest">Mặc định</span>
-                }
-              </div>
-            }
+        <button class="btn-close-custom" (click)="isApplySelectionModalOpen = false">&times;</button>
+      </div>
+      
+      <div class="modal-body-custom">
+        <!-- Basic Information -->
+        <h3 class="section-title">Thông tin cơ bản</h3>
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label>Họ và tên <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="applyForm.fullName" placeholder="Họ và tên" class="form-control">
+          </div>
+          <div class="form-group half-width">
+            <label>Số điện thoại <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="applyForm.phone" placeholder="Số điện thoại" class="form-control">
+          </div>
+          <div class="form-group half-width">
+            <label>Email <span class="required">*</span></label>
+            <input type="email" [(ngModel)]="applyForm.email" placeholder="Email" class="form-control">
           </div>
         </div>
 
-        <div class="mb-0">
-          <label class="form-label fw-bold text-muted small text-uppercase mb-2">Lời nhắn (Tùy chọn)</label>
-          <textarea class="form-control premium-textarea" rows="3" 
-                    placeholder="Giới thiệu thêm về bản thân..." 
-                    [(ngModel)]="applyMessage"></textarea>
+        <!-- Current resumes -->
+        <h3 class="section-title">Chọn CV từ hệ thống:</h3>
+        <div class="cv-section-container">
+          <div class="cv-list-custom" *ngIf="userCVs().length > 0">
+            <div class="cv-item-box" *ngFor="let cv of userCVs()" [class.selected]="selectedCVForApply?.id === cv.id">
+              <div class="cv-item-main">
+                <label class="radio-label">
+                  <input type="radio" name="selectedCv" [value]="cv.id" [checked]="selectedCVForApply?.id === cv.id" (change)="onSelectCvToApply(cv)">
+                  <span class="cv-name">{{ cv.fileName || 'CV của tôi' }}</span>
+                  <span class="cv-badge">10%</span>
+                </label>
+                <div class="cv-meta">
+                  <span class="cv-date">Cập nhật lần cuối lúc {{ cv.uploadDate | date:'HH:mm dd/MM/yyyy' }}</span>
+                  <div class="cv-actions">
+                    <i class="bi bi-pencil"></i>
+                    <i class="bi bi-eye"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="ats-hint">
+                Nhà tuyển dụng ưu tiên CV chuẩn ATS. <a href="#">Hoàn thiện CV &gt;</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="no-cv-custom" *ngIf="userCVs().length === 0">
+            <p>Bạn chưa có bản CV nào trên hệ thống.</p>
+          </div>
+          
+          <div class="upload-new-container">
+            <button class="btn-upload-cv">
+              <i class="bi bi-cloud-upload"></i> Tải lên CV mới
+            </button>
+            <span class="upload-hint">Hỗ trợ *.doc, *.docx, *.pdf và < 5MB</span>
+          </div>
+        </div>
+
+        <!-- Cover Letter -->
+        <h3 class="section-title">Thư giới thiệu (Cover Letter)</h3>
+        <div class="cover-letter-editor">
+          <div class="editor-toolbar">
+            <button><i class="bi bi-type-bold"></i></button>
+            <button><i class="bi bi-type-italic"></i></button>
+            <button><i class="bi bi-type-underline"></i></button>
+            <button><i class="bi bi-list-ul"></i></button>
+            <button><i class="bi bi-list-ol"></i></button>
+          </div>
+          <textarea 
+            [(ngModel)]="applyMessage" 
+            (ngModelChange)="updateWordCount()"
+            placeholder="Nhập lời giới thiệu bản thân hoặc liên kết portfolio"></textarea>
+          <div class="word-count-bar">
+            <span>{{ wordCount }} từ</span>
+          </div>
         </div>
       </div>
 
-      <div class="modal-footer-premium d-flex gap-3 mt-4 pt-4 border-top">
-        <button class="btn btn-outline-secondary flex-grow-1 rounded-pill py-3 fw-bold" (click)="isApplySelectionModalOpen = false">Hủy</button>
-        <button class="btn btn-primary flex-grow-1 rounded-pill py-3 fw-bold hover-glow" 
-                [class.btn-success]="jobs().find(j => j.id === applyingJobId)?.isApplied"
-                (click)="submitApplicationWithCV()">
-          {{ jobs().find(j => j.id === applyingJobId)?.isApplied ? 'Lưu thay đổi' : 'Nộp đơn ngay' }}
-        </button>
+      <div class="modal-footer-custom">
+        <button class="btn-cancel-custom" (click)="isApplySelectionModalOpen = false">Hủy</button>
+        <button class="btn-submit-custom" [disabled]="!selectedCVForApply" (click)="submitApplicationWithCV()">Nộp CV</button>
       </div>
     </div>
   </div>

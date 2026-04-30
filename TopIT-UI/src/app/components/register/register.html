@@ -26,15 +26,17 @@
 
                 <div class="input-group-custom mb-3">
                     <label class="small">Mật khẩu <span class="text-danger">*</span></label>
-                    <div class="input-wrapper">
-                        <input type="password" placeholder="Tối thiểu 8 ký tự" name="password" [(ngModel)]="registerData.password" required>
+                    <div class="input-wrapper d-flex align-items-center">
+                        <input [type]="showPassword ? 'text' : 'password'" placeholder="Tối thiểu 8 ký tự" name="password" [(ngModel)]="registerData.password" required>
+                        <i class="bi" [class.bi-eye]="!showPassword" [class.bi-eye-slash]="showPassword" (click)="showPassword = !showPassword" style="cursor: pointer;"></i>
                     </div>
                 </div>
 
                 <div class="input-group-custom mb-4">
                     <label class="small">Xác nhận mật khẩu <span class="text-danger">*</span></label>
-                    <div class="input-wrapper">
-                        <input type="password" placeholder="Nhập lại mật khẩu" name="confirmPassword" [(ngModel)]="registerData.confirmPassword" required>
+                    <div class="input-wrapper d-flex align-items-center">
+                        <input [type]="showConfirmPassword ? 'text' : 'password'" placeholder="Nhập lại mật khẩu" name="confirmPassword" [(ngModel)]="registerData.confirmPassword" required>
+                        <i class="bi" [class.bi-eye]="!showConfirmPassword" [class.bi-eye-slash]="showConfirmPassword" (click)="showConfirmPassword = !showConfirmPassword" style="cursor: pointer;"></i>
                     </div>
                 </div>
 

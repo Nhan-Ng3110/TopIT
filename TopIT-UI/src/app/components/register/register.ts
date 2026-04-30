@@ -24,6 +24,9 @@ export class RegisterComponent {
     confirmPassword: ''
   };
 
+  showPassword = false;
+  showConfirmPassword = false;
+
   onRegister() {
     if (this.registerData.password !== this.registerData.confirmPassword) {
       this.notificationService.warning('Mật khẩu xác nhận không khớp. Vui lòng kiểm tra lại!');

@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Text.Json;
 using TopIT.Core.Entities;
 using TopIT.Core.Interfaces;
+using TopIT.Infrastructure.Services;
 
 namespace TopIT.API.Controllers
 {
@@ -14,11 +16,13 @@ namespace TopIT.API.Controllers
     {
         private readonly IUserCVRepository _cvRepo;
         private readonly IWebHostEnvironment _env;
+        private readonly CvParserService _cvParser;
 
-        public UserCVController(IUserCVRepository cvRepo, IWebHostEnvironment env)
+        public UserCVController(IUserCVRepository cvRepo, IWebHostEnvironment env, CvParserService cvParser)
         {
             _cvRepo = cvRepo;
             _env = env;
+            _cvParser = cvParser;
         }
 
         [HttpGet]
@@ -92,6 +96,49 @@ namespace TopIT.API.Controllers
             await _cvRepo.AddAsync(userCV);
 
             return Ok(new { message = "Tải lên CV thành công!" });
+        }
+
+        // POST /api/UserCV/parse - Phân tích CV bằng AI
+        [AllowAnonymous]
+        [HttpPost("parse")]
+        public async Task<IActionResult> ParseCV(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest(new { message = "Vui lòng chọn file CV để phân tích." });
+
+            var extension = Path.GetExtension(file.FileName).ToLower();
+            if (extension != ".pdf")
+                return BadRequest(new { message = "Chỉ hỗ trợ phân tích file PDF." });
+
+            if (file.Length > 5 * 1024 * 1024)
+                return BadRequest(new { message = "File PDF không được vượt quá 5MB." });
+
+            try
+            {
+                // Bước 1: Trích xuất text từ PDF
+                var pdfText = await _cvParser.ExtractTextFromPdfAsync(file);
+
+                // Bước 2: Gọi Gemini AI phân tích
+                var parsed = await _cvParser.ParseCvTextAsync(pdfText);
+
+                return Ok(parsed);
+            }
+            catch (InvalidOperationException ex) when (ex.Message == "PDF_TOO_SHORT")
+            {
+                return UnprocessableEntity(new { message = "PDF này có vẻ là file scan hoặc ảnh. Hệ thống chỉ đọc được PDF dạng text. Vui lòng thử file khác hoặc tự điền thông tin." });
+            }
+            catch (JsonException)
+            {
+                return UnprocessableEntity(new { message = "AI không thể phân tích được cấu trúc CV này. Vui lòng tự điền thông tin hoặc thử file PDF khác." });
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode(502, new { message = $"Không thể kết nối đến dịch vụ AI: {ex.Message}" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Lỗi hệ thống khi phân tích CV: {ex.Message}" });
+            }
         }
 
         [HttpDelete("{id}")]

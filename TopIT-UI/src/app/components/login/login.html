@@ -33,8 +33,8 @@
                         <a href="#" class="text-primary small text-decoration-none">Quên mật khẩu?</a>
                     </div>
                     <div class="input-wrapper d-flex align-items-center">
-                        <input type="password" placeholder="••••••••" name="password" [(ngModel)]="loginData.password" required>
-                        <i class="bi bi-eye-slash text-muted" style="cursor: pointer;"></i>
+                        <input [type]="showPassword ? 'text' : 'password'" placeholder="••••••••" name="password" [(ngModel)]="loginData.password" required>
+                        <i class="bi" [class.bi-eye]="!showPassword" [class.bi-eye-slash]="showPassword" (click)="showPassword = !showPassword" style="cursor: pointer;"></i>
                     </div>
                 </div>
 

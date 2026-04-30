@@ -258,210 +258,336 @@
   animation: fadeIn 0.3s ease-out;
 }
 
-.apply-modal {
+.custom-apply-modal {
   background: white;
-  width: 600px;
-  max-width: 90vw;
-  border-radius: 24px;
+  width: 700px;
+  max-width: 95vw;
+  border-radius: 8px;
   overflow: hidden;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   
   &.slide-in {
     animation: slideInBottom 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .modal-header {
-    padding: 24px 32px;
-    border-bottom: 1px solid var(--border-color);
+  .modal-header-custom {
+    padding: 24px;
+    border-bottom: 2px solid #f0f0f0;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
 
-    h2 {
-      font-size: 22px;
-      font-weight: 700;
-      margin: 0;
+    .header-text {
+      .subtitle {
+        color: #6b7280;
+        font-size: 14px;
+        margin-bottom: 8px;
+        font-weight: 500;
+      }
+      .title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0;
+
+        .job-title-blue {
+          color: #3b82f6;
+        }
+      }
     }
 
-    .btn-close {
-      background: var(--bg-secondary);
+    .btn-close-custom {
+      background: none;
       border: none;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
+      font-size: 24px;
+      color: #9ca3af;
       cursor: pointer;
-      font-size: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-
+      padding: 0;
+      line-height: 1;
+      
       &:hover {
-        background: #e2e8f0;
-        transform: rotate(90deg);
+        color: #4b5563;
       }
     }
   }
 
-  .modal-body {
-    padding: 32px;
+  .modal-body-custom {
+    padding: 24px;
     max-height: 70vh;
     overflow-y: auto;
 
-    .cv-list {
-      margin: 20px 0;
+    .section-title {
+      color: #3b82f6;
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+
+    .form-grid {
       display: flex;
-      flex-direction: column;
-      gap: 12px;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 32px;
 
-      .cv-item {
-        padding: 16px 20px;
+      .form-group {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        cursor: pointer;
-        border: 2px solid transparent;
-        transition: all 0.2s;
+        flex-direction: column;
 
-        &:hover {
-          background: var(--bg-secondary);
-          transform: none; // Disable translateY for items
+        &.full-width {
+          width: 100%;
+        }
+        &.half-width {
+          width: calc(50% - 8px);
         }
 
-        &.selected {
-          border-color: var(--primary-color);
-          background: rgba(37, 99, 235, 0.05);
+        label {
+          font-size: 14px;
+          color: #4b5563;
+          font-weight: 500;
+          margin-bottom: 6px;
 
-          .check-mark i {
-            color: var(--primary-color);
-            font-size: 20px;
+          .required {
+            color: #ef4444;
           }
         }
 
-        .cv-info {
-          display: flex;
-          flex-direction: column;
-          
-          .cv-name {
-            font-weight: 600;
-            margin-bottom: 4px;
-          }
+        .form-control {
+          padding: 10px 14px;
+          border: 1px solid #d1d5db;
+          border-radius: 6px;
+          font-size: 14px;
+          outline: none;
+          transition: border-color 0.2s;
 
-          .cv-date {
-            font-size: 12px;
-            color: var(--text-muted);
+          &:focus {
+            border-color: #3b82f6;
           }
         }
       }
     }
 
-    .message-area {
-      margin-top: 24px;
-      
-      label {
-        display: block;
-        font-weight: 600;
-        margin-bottom: 8px;
-        font-size: 14px;
+    .cv-section-container {
+      margin-bottom: 32px;
+
+      .cv-list-custom {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 16px;
+
+        .cv-item-box {
+          background-color: #f3f4f6;
+          border-radius: 6px;
+          padding: 16px;
+          border: 1px solid transparent;
+
+          &.selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+          }
+
+          .cv-item-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+
+            .radio-label {
+              display: flex;
+              align-items: center;
+              cursor: pointer;
+              gap: 10px;
+
+              input[type="radio"] {
+                margin: 0;
+                accent-color: #3b82f6;
+              }
+
+              .cv-name {
+                font-weight: 500;
+                color: #1f2937;
+              }
+
+              .cv-badge {
+                background: #fee2e2;
+                color: #ef4444;
+                font-size: 12px;
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-weight: 600;
+              }
+            }
+
+            .cv-meta {
+              display: flex;
+              align-items: center;
+              gap: 16px;
+
+              .cv-date {
+                font-size: 13px;
+                color: #9ca3af;
+              }
+
+              .cv-actions {
+                display: flex;
+                gap: 10px;
+                color: #9ca3af;
+
+                i {
+                  cursor: pointer;
+                  &:hover {
+                    color: #4b5563;
+                  }
+                }
+              }
+            }
+          }
+
+          .ats-hint {
+            font-size: 13px;
+            color: #6b7280;
+            padding-left: 26px;
+
+            a {
+              color: #3b82f6;
+              text-decoration: none;
+              font-weight: 500;
+
+              &:hover {
+                text-decoration: underline;
+              }
+            }
+          }
+        }
+      }
+
+      .upload-new-container {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+
+        .btn-upload-cv {
+          background-color: #3b82f6;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          padding: 10px 20px;
+          font-weight: 500;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          &:hover {
+            background-color: #2563eb;
+          }
+        }
+
+        .upload-hint {
+          font-size: 13px;
+          color: #6b7280;
+        }
+      }
+    }
+
+    .cover-letter-editor {
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      overflow: hidden;
+
+      .editor-toolbar {
+        background-color: #f9fafb;
+        border-bottom: 1px solid #d1d5db;
+        padding: 8px 12px;
+        display: flex;
+        gap: 12px;
+
+        button {
+          background: none;
+          border: none;
+          color: #4b5563;
+          cursor: pointer;
+          padding: 4px;
+
+          &:hover {
+            color: #1f2937;
+          }
+        }
       }
 
       textarea {
         width: 100%;
         height: 120px;
+        border: none;
         padding: 16px;
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
         resize: none;
-        font-family: inherit;
         outline: none;
-        transition: border-color 0.2s;
+        font-family: inherit;
+        font-size: 14px;
+        color: #1f2937;
 
-        &:focus {
-          border-color: var(--primary-color);
+        &::placeholder {
+          color: #9ca3af;
         }
       }
-    }
 
-    .no-cv {
-      text-align: center;
-      padding: 40px 0;
+      .word-count-bar {
+        background-color: #f9fafb;
+        border-top: 1px solid #d1d5db;
+        padding: 8px 16px;
+        text-align: right;
 
-      .no-cv-icon {
-        font-size: 64px;
-        margin-bottom: 16px;
-      }
-
-      p {
-        color: var(--text-muted);
-        margin-bottom: 24px;
-      }
-
-      .btn-manage-cv {
-        background: var(--primary-color);
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 10px;
-        font-weight: 600;
-        cursor: pointer;
-      }
-    }
-
-    // Banner info trong modal khi cập nhật đơn cũ
-    .modal-info-banner {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      background: rgba(16, 185, 129, 0.07);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-      border-radius: 12px;
-      padding: 14px 18px;
-      margin-bottom: 20px;
-      animation: fadeIn 0.4s ease-out;
-
-      i {
-        color: #059669;
-        font-size: 16px;
-        margin-top: 2px;
-        flex-shrink: 0;
-      }
-
-      span {
-        font-size: 14px;
-        color: #065f46;
-        line-height: 1.55;
+        span {
+          font-size: 12px;
+          color: #6b7280;
+        }
       }
     }
   }
 
-  .modal-footer {
-    padding: 24px 32px;
-    background: var(--bg-secondary);
+  .modal-footer-custom {
+    padding: 16px 24px;
+    border-top: 1px solid #f0f0f0;
     display: flex;
     justify-content: flex-end;
+    align-items: center;
     gap: 16px;
+    background: white;
 
-    .btn-cancel {
-      padding: 12px 24px;
-      background: white;
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
+    .btn-cancel-custom {
+      background: none;
+      border: none;
+      color: #4b5563;
+      font-weight: 500;
       cursor: pointer;
-      font-weight: 600;
+      font-size: 14px;
+
+      &:hover {
+        color: #1f2937;
+      }
     }
 
-    .btn-submit {
-      padding: 12px 24px;
-      background: var(--accent-gradient);
+    .btn-submit-custom {
+      background-color: #3b82f6;
       color: white;
       border: none;
-      border-radius: 10px;
+      border-radius: 6px;
+      padding: 10px 24px;
+      font-weight: 500;
       cursor: pointer;
-      font-weight: 600;
+      font-size: 14px;
 
       &:disabled {
         opacity: 0.5;
         cursor: not-allowed;
+      }
+
+      &:not(:disabled):hover {
+        background-color: #2563eb;
       }
     }
   }

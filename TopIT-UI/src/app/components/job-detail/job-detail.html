@@ -94,54 +94,95 @@
 
   <!-- Modal Ứng tuyển -->
   <div class="apply-modal-backdrop" *ngIf="showApplyModal" (click)="closeModal()">
-    <div class="apply-modal card-premium" (click)="$event.stopPropagation()" [class.slide-in]="showApplyModal">
-      <div class="modal-header">
-        <h2>{{ job.isApplied ? 'Cập nhật ứng tuyển' : 'Ứng tuyển vị trí' }} <span class="text-gradient">{{ job.title }}</span></h2>
-        <button class="btn-close" (click)="closeModal()">&times;</button>
+    <div class="apply-modal custom-apply-modal" (click)="$event.stopPropagation()" [class.slide-in]="showApplyModal">
+      <div class="modal-header-custom">
+        <div class="header-text">
+          <p class="subtitle">Bạn đang ứng tuyển cho vị trí</p>
+          <h2 class="title">
+            <span class="job-title-blue">{{ job.title }}</span> tại {{ job.company?.name }}
+          </h2>
+        </div>
+        <button class="btn-close-custom" (click)="closeModal()">&times;</button>
       </div>
       
-      <div class="modal-body">
-        <!-- Info banner khi đang cập nhật đơn cũ -->
-        <div class="modal-info-banner" *ngIf="job.isApplied">
-          <i class="fas fa-circle-info"></i>
-          <span>Hệ thống đã ghi nhận đơn ứng tuyển cũ của bạn. Bạn có thể chỉnh sửa và lưu lại.</span>
+      <div class="modal-body-custom">
+        <!-- Basic Information -->
+        <h3 class="section-title">Thông tin cơ bản</h3>
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label>Họ và tên <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="applyForm.fullName" placeholder="Họ và tên" class="form-control">
+          </div>
+          <div class="form-group half-width">
+            <label>Số điện thoại <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="applyForm.phone" placeholder="Số điện thoại" class="form-control">
+          </div>
+          <div class="form-group half-width">
+            <label>Email <span class="required">*</span></label>
+            <input type="email" [(ngModel)]="applyForm.email" placeholder="Email" class="form-control">
+          </div>
         </div>
 
-        <div class="cv-selection" *ngIf="userCvs.length > 0">
-          <p class="help-text">{{ job.isApplied ? 'CV được chọn lần trước đã được tự động tích. Bạn có thể đổi sang CV khác:' : 'Vui lòng chọn 1 CV của bạn để ứng tuyển:' }}</p>
-          <div class="cv-list">
-            <div class="cv-item card-premium" 
-                 *ngFor="let cv of userCvs" 
-                 [class.selected]="selectedCvId === cv.id"
-                 (click)="selectCv(cv)">
-              <div class="cv-info">
-                <span class="cv-name">{{ cv.fileName }}</span>
-                <span class="cv-date">Cập nhật: {{ cv.uploadDate | date:'dd/MM/yyyy' }}</span>
+        <!-- Current resumes -->
+        <h3 class="section-title">Chọn CV của bạn:</h3>
+        <div class="cv-section-container">
+          <div class="cv-list-custom" *ngIf="userCvs.length > 0">
+            <div class="cv-item-box" *ngFor="let cv of userCvs" [class.selected]="selectedCvId === cv.id">
+              <div class="cv-item-main">
+                <label class="radio-label">
+                  <input type="radio" name="selectedCv" [value]="cv.id" [(ngModel)]="selectedCvId" (change)="selectCv(cv)">
+                  <span class="cv-name">{{ cv.fileName || 'CV của tôi' }}</span>
+                  <span class="cv-badge">10%</span>
+                </label>
+                <div class="cv-meta">
+                  <span class="cv-date">Cập nhật lần cuối lúc {{ cv.uploadDate | date:'HH:mm dd/MM/yyyy' }}</span>
+                  <div class="cv-actions">
+                    <i class="fas fa-edit"></i>
+                    <i class="fas fa-eye"></i>
+                  </div>
+                </div>
               </div>
-              <div class="check-mark" *ngIf="selectedCvId === cv.id">
-                <i class="fas fa-check-circle"></i>
+              <div class="ats-hint">
+                Nhà tuyển dụng ưu tiên CV chuẩn ATS. <a href="#">Hoàn thiện CV &gt;</a>
               </div>
             </div>
           </div>
 
-          <div class="message-area">
-            <label for="message">Lời nhắn cho nhà tuyển dụng (không bắt buộc):</label>
-            <textarea id="message" [(ngModel)]="applyMessage" placeholder="Giới thiệu ngắn gọn về bản thân..."></textarea>
+          <div class="no-cv-custom" *ngIf="userCvs.length === 0">
+            <p>Bạn chưa có bản CV nào trên hệ thống.</p>
+          </div>
+          
+          <div class="upload-new-container">
+            <button class="btn-upload-cv">
+              <i class="fas fa-file-upload"></i> Tải lên CV mới
+            </button>
+            <span class="upload-hint">Hỗ trợ *.doc, *.docx, *.pdf và < 5MB</span>
           </div>
         </div>
 
-        <div class="no-cv" *ngIf="userCvs.length === 0">
-          <div class="no-cv-icon">📄</div>
-          <p>Bạn chưa có bản CV nào trên hệ thống.</p>
-          <button class="btn-manage-cv hover-glow" routerLink="/my-cvs">Quản lý CV ngay</button>
+        <!-- Cover Letter -->
+        <h3 class="section-title">Thư giới thiệu</h3>
+        <div class="cover-letter-editor">
+          <div class="editor-toolbar">
+            <button><i class="fas fa-bold"></i></button>
+            <button><i class="fas fa-italic"></i></button>
+            <button><i class="fas fa-underline"></i></button>
+            <button><i class="fas fa-list-ul"></i></button>
+            <button><i class="fas fa-list-ol"></i></button>
+          </div>
+          <textarea 
+            [(ngModel)]="applyMessage" 
+            (ngModelChange)="updateWordCount()"
+            placeholder="Nhập lời giới thiệu bản thân hoặc liên kết portfolio"></textarea>
+          <div class="word-count-bar">
+            <span>{{ wordCount }} từ</span>
+          </div>
         </div>
       </div>
 
-      <div class="modal-footer" *ngIf="userCvs.length > 0">
-        <button class="btn-cancel" (click)="closeModal()">Hủy</button>
-        <button class="btn-submit hover-glow" [disabled]="!selectedCvId" (click)="submitApplication()">
-          {{ job.isApplied ? 'Lưu thay đổi' : 'Xác nhận ứng tuyển' }}
-        </button>
+      <div class="modal-footer-custom">
+        <button class="btn-cancel-custom" (click)="closeModal()">Hủy</button>
+        <button class="btn-submit-custom" [disabled]="!selectedCvId" (click)="submitApplication()">Gửi CV</button>
       </div>
     </div>
   </div>

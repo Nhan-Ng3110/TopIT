@@ -18,34 +18,57 @@ namespace TopIT.API.Data
             using var scope = serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            // Kiểm tra xem đã có Admin chưa
-            bool adminExists = await context.Users.AnyAsync(u => u.Role == "Admin");
-            if (adminExists) return;
-
-            // Tạo Admin mặc định
-            const string adminEmail = "admin@topit.vn";
-            const string adminPassword = "Admin@TopIT2025!";
-
-            CreatePasswordHash(adminPassword, out byte[] passwordHash, out byte[] passwordSalt);
-
-            var adminUser = new User
+            // 1. Tạo Công ty mẫu nếu chưa có
+            var defaultCompany = await context.Companies.FirstOrDefaultAsync(c => c.Name == "TopIT Solution");
+            if (defaultCompany == null)
             {
-                FullName = "System Administrator",
-                Email = adminEmail,
-                PasswordHash = passwordHash,
-                PasswordSalt = passwordSalt,
-                Role = "Admin"
-            };
+                defaultCompany = new Company
+                {
+                    Name = "TopIT Solution",
+                    Description = "Công ty công nghệ hàng đầu Việt Nam",
+                    Address = "Hà Nội, Việt Nam",
+                    Website = "https://topit.vn",
+                    Size = "50-100 nhân viên"
+                };
+                await context.Companies.AddAsync(defaultCompany);
+                await context.SaveChangesAsync();
+            }
 
-            await context.Users.AddAsync(adminUser);
+            // 2. Tạo Admin
+            bool adminExists = await context.Users.AnyAsync(u => u.Role == "Admin");
+            if (!adminExists)
+            {
+                CreatePasswordHash("Admin@TopIT2025!", out byte[] adminHash, out byte[] adminSalt);
+                var adminUser = new User
+                {
+                    FullName = "System Administrator",
+                    Email = "admin@topit.vn",
+                    PasswordHash = adminHash,
+                    PasswordSalt = adminSalt,
+                    Role = "Admin"
+                };
+                await context.Users.AddAsync(adminUser);
+            }
+
+            // 3. Tạo Employer mẫu
+            bool employerExists = await context.Users.AnyAsync(u => u.Email == "employer@topit.vn");
+            if (!employerExists)
+            {
+                CreatePasswordHash("Employer@TopIT2025!", out byte[] empHash, out byte[] empSalt);
+                var employerUser = new User
+                {
+                    FullName = "HR Manager",
+                    Email = "employer@topit.vn",
+                    PasswordHash = empHash,
+                    PasswordSalt = empSalt,
+                    Role = "Employer",
+                    CompanyId = defaultCompany.Id
+                };
+                await context.Users.AddAsync(employerUser);
+            }
+
             await context.SaveChangesAsync();
-
-            Console.WriteLine("==============================================");
-            Console.WriteLine("[DataSeeder] Đã tạo tài khoản Admin mặc định.");
-            Console.WriteLine($"  Email   : {adminEmail}");
-            Console.WriteLine($"  Password: {adminPassword}");
-            Console.WriteLine("  ⚠️  Vui lòng đổi mật khẩu sau khi đăng nhập!");
-            Console.WriteLine("==============================================");
+            Console.WriteLine("[DataSeeder] Đã khởi tạo dữ liệu mẫu (Admin & Employer).");
         }
 
         private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
