@@ -60,7 +60,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString, sqlOptions => 
+        sqlOptions.EnableRetryOnFailure()));
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
