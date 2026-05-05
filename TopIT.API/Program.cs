@@ -56,6 +56,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = builder.Configuration.GetSection("Jwt:Audience").Value,
             ValidateLifetime = true
         };
+        // Cho phép SignalR gửi token qua query string
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chatHub"))
+                    context.Token = accessToken;
+                return Task.CompletedTask;
+            }
+        };
     });
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -118,6 +130,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<NotificationHub>("/notificationHub");
+app.MapHub<TopIT.API.Hubs.ChatHub>("/chatHub");
 
 // Seed Admin account if none exists
 await DataSeeder.SeedAdminAsync(app.Services);

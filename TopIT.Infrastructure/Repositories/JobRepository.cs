@@ -30,7 +30,11 @@ namespace TopIT.Infrastructure.Repositories
 
             if (!string.IsNullOrWhiteSpace(searchDto.Location))
             {
-                query = query.Where(j => j.Location.Contains(searchDto.Location));
+                var locations = searchDto.Location.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                                  .Select(l => l.Trim())
+                                                  .ToList();
+                
+                query = query.Where(j => locations.Any(loc => j.Location.Contains(loc)));
             }
 
             

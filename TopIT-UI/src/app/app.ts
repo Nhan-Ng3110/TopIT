@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { RouterOutlet, RouterLink } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './services/auth';
 import { NotificationToastComponent } from './components/notification-toast/notification-toast';
@@ -7,7 +7,7 @@ import { NotificationToastComponent } from './components/notification-toast/noti
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, CommonModule, NotificationToastComponent], 
+  imports: [RouterOutlet, RouterLink, RouterModule, CommonModule, NotificationToastComponent], 
   templateUrl: './app.html', 
   styleUrl: './app.scss'
 })

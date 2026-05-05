@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { JobService } from '../../services/job'; 
 import { ApplicationService } from '../../services/application'; 
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { NotificationService } from '../../services/notification';
 import { UserCvService, UserCV } from '../../services/user-cv.service';
@@ -11,7 +11,7 @@ import { UserCvService, UserCV } from '../../services/user-cv.service';
 @Component({
   selector: 'app-job-list',
   standalone: true,
-  imports: [CommonModule, FormsModule], 
+  imports: [CommonModule, FormsModule, RouterModule], 
   templateUrl: './job-list.html',
   styleUrl: './job-list.scss',
 })
@@ -344,6 +344,24 @@ export class JobListComponent implements OnInit {
         this.notificationService.error('Lỗi khi nộp đơn: ' + (err.error?.message || 'Vui lòng thử lại.'));
       }
     });
+  }
+
+  openChat(employerId: number | undefined) {
+    if (!this.authService.isAuthenticated()) {
+      const returnUrl = this.router.url;
+      this.notificationService.info('Vui lòng đăng nhập để chat với nhà tuyển dụng!');
+      this.router.navigate(['/login'], { queryParams: { returnUrl } });
+      return;
+    }
+    
+    if (!employerId) {
+      this.notificationService.error('Không tìm thấy thông tin nhà tuyển dụng!');
+      return;
+    }
+    
+    // Khi trang Chat hoàn chỉnh:
+    // this.router.navigate(['/chat'], { queryParams: { employerId: employerId } });
+    this.notificationService.info('Tính năng Chat với Employer đang được cập nhật...');
   }
 
   toggleSaveJob(event: Event, job: any) {

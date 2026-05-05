@@ -274,6 +274,23 @@
   }
 }
 
+.btn-view-detail {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0d6efd;
+  text-decoration: none;
+  transition: all 0.2s;
+
+  &:hover {
+    color: darken(#0d6efd, 10%);
+    gap: 8px;
+  }
+}
+
+
 .btn-save-job {
   position: absolute;
   top: 20px;

@@ -43,6 +43,7 @@ export const routes: Routes = [
       { path: 'dashboard', loadComponent: () => import('./components/job-list/job-list').then(m => m.JobListComponent) },
       { path: 'jobs', loadComponent: () => import('./components/employer/jobs/jobs').then(m => m.EmployerJobsComponent) },
       { path: 'candidates', loadComponent: () => import('./components/employer/candidates/candidates').then(m => m.EmployerCandidatesComponent) },
+      { path: 'messages', loadComponent: () => import('./components/employer/messages/messages').then(m => m.EmployerMessagesComponent) },
       { path: 'company', loadComponent: () => import('./components/employer/company/company').then(m => m.CompanyProfileComponent) }
     ]
   }

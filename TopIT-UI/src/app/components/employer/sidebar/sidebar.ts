@@ -34,6 +34,10 @@ import { RouterModule, Router } from '@angular/router';
           <span>Ứng viên</span>
           <span class="badge rounded-pill bg-danger ms-auto">Mới</span>
         </a>
+        <a routerLink="/employer/messages" routerLinkActive="active" class="nav-item">
+          <i class="bi bi-chat-dots"></i>
+          <span>Tin nhắn</span>
+        </a>
         <a routerLink="/employer/company" routerLinkActive="active" class="nav-item">
           <i class="bi bi-building-gear"></i>
           <span>Hồ sơ công ty</span>

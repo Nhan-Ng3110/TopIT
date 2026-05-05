@@ -1,189 +1,243 @@
-<div class="job-detail-container" *ngIf="job">
-  <!-- Brand Cover -->
-  <div class="company-cover-hero" *ngIf="job.company?.coverPath" [style.background-image]="'url(' + getCoverUrl(job.company.coverPath) + ')'">
-    <div class="cover-overlay"></div>
+<div class="jd-page" *ngIf="job">
+  <div class="jd-container">
+
+    <!-- ===== TOP HEADER CARD ===== -->
+    <div class="jd-header-card">
+      <div class="jd-header-left">
+        <div class="jd-company-logo">
+          <img [src]="job.company?.logoPath ? 'https://localhost:7151/uploads/' + job.company.logoPath : 'assets/images/default-company.png'" [alt]="job.company?.name" />
+        </div>
+        <div class="jd-header-info">
+          <a [routerLink]="['/companies', job.companyId]" class="jd-company-name">{{ job.company?.name }}</a>
+          <h1 class="jd-job-title">{{ job.title }}</h1>
+          <div class="jd-meta-row">
+            <span class="jd-meta-badge salary">
+              <i class="bi bi-cash-stack"></i>
+              <span *ngIf="job.isNegotiable">Thỏa thuận</span>
+              <span *ngIf="!job.isNegotiable">{{ job.salaryMin | number }}&nbsp;-&nbsp;{{ job.salaryMax | number }} VND</span>
+            </span>
+            <span class="jd-meta-badge">
+              <i class="bi bi-geo-alt-fill"></i> {{ job.location }}
+            </span>
+            <span class="jd-meta-badge">
+              <i class="bi bi-bar-chart-steps"></i> {{ job.level }}
+            </span>
+            <span class="jd-meta-badge">
+              <i class="bi bi-briefcase-fill"></i> {{ job.jobType }}
+            </span>
+            <span class="jd-meta-badge" *ngIf="job.experienceYears >= 0">
+              <i class="bi bi-clock-fill"></i>
+              {{ job.experienceYears > 0 ? job.experienceYears + ' năm kinh nghiệm' : 'Không yêu cầu kinh nghiệm' }}
+            </span>
+          </div>
+          <div class="jd-deadline">
+            <i class="bi bi-calendar-check"></i>
+            Hạn nộp hồ sơ: {{ job.createdAt | date:'dd-MM-yyyy' }}
+          </div>
+        </div>
+      </div>
+
+      <div class="jd-header-actions">
+        <button class="btn-apply-main" (click)="onApplyNow()" [class.applied]="job.isApplied">
+          <i class="bi" [ngClass]="job.isApplied ? 'bi-pencil-square' : 'bi-send-fill'"></i>
+          {{ job.isApplied ? 'CẬP NHẬT ỨNG TUYỂN' : 'ỨNG TUYỂN NGAY' }}
+        </button>
+        <button class="btn-save-main">
+          <i class="bi bi-bookmark"></i> Lưu công việc
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== MAIN BODY: 2-COLUMN LAYOUT ===== -->
+    <div class="jd-body">
+
+      <!-- LEFT: Content -->
+      <div class="jd-content-col">
+        <div class="jd-content-card">
+
+          <section class="jd-section" *ngIf="job.description">
+            <h2 class="jd-section-title">
+              <span class="section-num">1</span> Mô tả công việc & Trách nhiệm
+            </h2>
+            <div class="jd-section-body">
+              <p *ngFor="let line of formatLines(job.description)" class="jd-text-line">{{ line }}</p>
+            </div>
+          </section>
+
+          <section class="jd-section" *ngIf="job.requirements">
+            <h2 class="jd-section-title">
+              <span class="section-num">2</span> Kỹ năng & Chuyên môn
+            </h2>
+            <ul class="jd-bullet-list">
+              <li *ngFor="let line of formatBullets(job.requirements)">{{ line }}</li>
+            </ul>
+          </section>
+
+          <section class="jd-section" *ngIf="job.benefits">
+            <h2 class="jd-section-title">
+              <span class="section-num">3</span> Quyền lợi
+            </h2>
+            <ul class="jd-bullet-list benefit">
+              <li *ngFor="let line of formatBullets(job.benefits)">
+                <i class="bi bi-check-circle-fill text-success me-2"></i>{{ line }}
+              </li>
+            </ul>
+          </section>
+
+        </div>
+
+        <!-- More jobs section placeholder -->
+        <div class="jd-more-jobs-card">
+          <h3 class="more-jobs-title">Công việc tương tự cho bạn</h3>
+          <p class="text-muted small">Khám phá thêm cơ hội phù hợp với bạn.</p>
+          <a routerLink="/jobs" class="btn-browse-more">
+            <i class="bi bi-search me-2"></i>Tìm thêm việc làm
+          </a>
+        </div>
+      </div>
+
+      <!-- RIGHT: Sidebar -->
+      <div class="jd-sidebar">
+
+        <!-- Company Card -->
+        <div class="jd-sidebar-card company-card">
+          <div class="sidebar-company-logo">
+            <img [src]="job.company?.logoPath ? 'https://localhost:7151/uploads/' + job.company.logoPath : 'assets/images/default-company.png'" [alt]="job.company?.name" />
+          </div>
+          <h3 class="sidebar-company-name">{{ job.company?.name }}</h3>
+          <div class="sidebar-company-size" *ngIf="job.company?.size">
+            <i class="bi bi-people-fill"></i> {{ job.company?.size }} Nhân viên
+          </div>
+          <a [routerLink]="['/companies', job.companyId]" class="sidebar-company-link">
+            Hồ sơ công ty <i class="bi bi-box-arrow-up-right"></i>
+          </a>
+
+          <!-- Chat Widget -->
+          <app-chat-widget
+            [receiverId]="job.company?.employerUserId || job.companyId"
+            [partnerName]="job.company?.name || 'Nh\u00e0 tuy\u1ec3n d\u1ee5ng'"
+            [jobId]="job.id">
+          </app-chat-widget>
+        </div>
+
+        <!-- Candidate Supporters Card -->
+        <div class="jd-sidebar-card supporters-card">
+          <h4 class="supporters-title">
+            <i class="bi bi-gear-fill"></i> Hỗ trợ ứng viên
+          </h4>
+          <div class="supporter-item">
+            <div class="supporter-icon">
+              <i class="bi bi-laptop-fill"></i>
+              <i class="bi bi-circle-fill supporter-dot"></i>
+            </div>
+            <div>
+              <p class="supporter-name">Chuẩn bị cho buổi phỏng vấn</p>
+              <p class="supporter-desc">Kiểm tra công cụ TopIT QnA để thực hành trả lời các câu hỏi phỏng vấn thông thường.</p>
+              <a href="#" class="supporter-link">Đọc QnA cho phỏng vấn ›</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
   </div>
+</div>
 
-  <!-- Header Phần header công việc -->
-  <div class="job-header card-premium" [class.has-cover]="job.company?.coverPath">
-    <div class="header-main">
-      <div class="company-logo">
-        <img [src]="job.company?.logoPath || 'assets/default-company.png'" [alt]="job.company?.name">
-      </div>
-      <div class="job-info">
-        <h1 class="job-title">{{ job.title }}</h1>
-        <p class="company-name text-gradient">{{ job.company?.name }}</p>
-        <div class="job-meta">
-          <span><i class="fas fa-map-marker-alt"></i> {{ job.location }}</span>
-          <span><i class="fas fa-briefcase"></i> {{ job.jobType }}</span>
-          <span><i class="fas fa-clock"></i> {{ job.createdAt | date:'dd/MM/yyyy' }}</span>
+<!-- Loading State -->
+<div class="jd-page" *ngIf="!job">
+  <div class="jd-container">
+    <div class="jd-skeleton-container">
+      <div class="skeleton-card">
+        <div class="sk-logo skeleton-pulse"></div>
+        <div class="sk-content">
+          <div class="sk-line skeleton-pulse" style="width:40%; height:14px;"></div>
+          <div class="sk-line skeleton-pulse" style="width:60%; height:24px; margin-top:8px;"></div>
+          <div class="sk-line skeleton-pulse" style="width:80%; height:14px; margin-top:12px;"></div>
         </div>
       </div>
-    </div>
-    <div class="header-action">
-      <div class="salary-box">
-        <span class="label">Mức lương</span>
-        <span class="value" *ngIf="!job.isNegotiable">{{ job.salaryMin | number }} - {{ job.salaryMax | number }} VND</span>
-        <span class="value" *ngIf="job.isNegotiable">Thỏa thuận</span>
-      </div>
-
-      <!-- Banner thông báo đã ứng tuyển -->
-      <div class="applied-banner" *ngIf="job.isApplied">
-        <i class="fas fa-circle-check"></i>
-        <span>Bạn đã nộp đơn cho vị trí này. Bạn có thể nhấn nút dưới đây để cập nhật hồ sơ mới nhất.</span>
-      </div>
-
-      <button class="btn-apply hover-glow" 
-              [class.applied]="job.isApplied"
-              (click)="onApplyNow()">
-        <i class="fas" [ngClass]="job.isApplied ? 'fa-pen-to-square' : 'fa-paper-plane'"></i>
-        {{ job.isApplied ? 'Cập nhật ứng tuyển' : 'Ứng tuyển ngay' }}
-      </button>
-    </div>
-  </div>
-
-  <div class="job-content-grid">
-    <!-- Cột trái: Nội dung chính -->
-    <div class="main-content">
-      <section class="content-section card-premium">
-        <h3><i class="fas fa-align-left"></i> Mô tả công việc</h3>
-        <div class="content-text">{{ job.description }}</div>
-      </section>
-
-      <section class="content-section card-premium" *ngIf="job.requirements">
-        <h3><i class="fas fa-list-check"></i> Yêu cầu công việc</h3>
-        <div class="content-text">{{ job.requirements }}</div>
-      </section>
-
-      <section class="content-section card-premium" *ngIf="job.benefits">
-        <h3><i class="fas fa-gift"></i> Quyền lợi</h3>
-        <div class="content-text">{{ job.benefits }}</div>
-      </section>
-    </div>
-
-    <!-- Cột phải: Thông tin thêm -->
-    <div class="sidebar-content">
-      <div class="info-card card-premium">
-        <h3>Thông tin chi tiết</h3>
-        <div class="info-item">
-          <span class="label">Cấp bậc</span>
-          <span class="value">{{ job.level }}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">Kinh nghiệm</span>
-          <span class="value">{{ job.experienceYears }} năm</span>
-        </div>
-        <div class="info-item">
-          <span class="label">Hình thức làm việc</span>
-          <span class="value">{{ job.jobType }}</span>
-        </div>
-      </div>
-
-      <div class="company-card card-premium">
-        <h3>Về công ty</h3>
-        <p class="company-desc">{{ job.company?.description }}</p>
-        <div class="company-stats">
-          <div class="stat">
-            <span class="label">Quy mô</span>
-            <span class="value">{{ job.company?.size || 'N/A' }} nhân viên</span>
-          </div>
+      <div class="skeleton-card" style="margin-top:16px;">
+        <div class="sk-content" style="width:100%">
+          <div class="sk-line skeleton-pulse" style="width:100%; height:18px;"></div>
+          <div class="sk-line skeleton-pulse" style="width:90%; height:14px; margin-top:10px;"></div>
+          <div class="sk-line skeleton-pulse" style="width:95%; height:14px; margin-top:8px;"></div>
+          <div class="sk-line skeleton-pulse" style="width:85%; height:14px; margin-top:8px;"></div>
         </div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Modal Ứng tuyển -->
-  <div class="apply-modal-backdrop" *ngIf="showApplyModal" (click)="closeModal()">
-    <div class="apply-modal custom-apply-modal" (click)="$event.stopPropagation()" [class.slide-in]="showApplyModal">
-      <div class="modal-header-custom">
-        <div class="header-text">
-          <p class="subtitle">Bạn đang ứng tuyển cho vị trí</p>
-          <h2 class="title">
-            <span class="job-title-blue">{{ job.title }}</span> tại {{ job.company?.name }}
-          </h2>
-        </div>
-        <button class="btn-close-custom" (click)="closeModal()">&times;</button>
+<!-- ===== MODAL Ứng tuyển ===== -->
+<div class="apply-modal-backdrop" *ngIf="showApplyModal" (click)="closeModal()">
+  <div class="apply-modal custom-apply-modal" (click)="$event.stopPropagation()" [class.slide-in]="showApplyModal">
+    <div class="modal-header-custom">
+      <div class="header-text">
+        <p class="subtitle">Bạn đang ứng tuyển cho vị trí</p>
+        <h2 class="title">
+          <span class="job-title-blue">{{ job.title }}</span> tại {{ job.company?.name }}
+        </h2>
       </div>
-      
-      <div class="modal-body-custom">
-        <!-- Basic Information -->
-        <h3 class="section-title">Thông tin cơ bản</h3>
-        <div class="form-grid">
-          <div class="form-group full-width">
-            <label>Họ và tên <span class="required">*</span></label>
-            <input type="text" [(ngModel)]="applyForm.fullName" placeholder="Họ và tên" class="form-control">
-          </div>
-          <div class="form-group half-width">
-            <label>Số điện thoại <span class="required">*</span></label>
-            <input type="text" [(ngModel)]="applyForm.phone" placeholder="Số điện thoại" class="form-control">
-          </div>
-          <div class="form-group half-width">
-            <label>Email <span class="required">*</span></label>
-            <input type="email" [(ngModel)]="applyForm.email" placeholder="Email" class="form-control">
-          </div>
-        </div>
+      <button class="btn-close-custom" (click)="closeModal()">&times;</button>
+    </div>
 
-        <!-- Current resumes -->
-        <h3 class="section-title">Chọn CV của bạn:</h3>
-        <div class="cv-section-container">
-          <div class="cv-list-custom" *ngIf="userCvs.length > 0">
-            <div class="cv-item-box" *ngFor="let cv of userCvs" [class.selected]="selectedCvId === cv.id">
-              <div class="cv-item-main">
-                <label class="radio-label">
-                  <input type="radio" name="selectedCv" [value]="cv.id" [(ngModel)]="selectedCvId" (change)="selectCv(cv)">
-                  <span class="cv-name">{{ cv.fileName || 'CV của tôi' }}</span>
-                  <span class="cv-badge">10%</span>
-                </label>
-                <div class="cv-meta">
-                  <span class="cv-date">Cập nhật lần cuối lúc {{ cv.uploadDate | date:'HH:mm dd/MM/yyyy' }}</span>
-                  <div class="cv-actions">
-                    <i class="fas fa-edit"></i>
-                    <i class="fas fa-eye"></i>
-                  </div>
-                </div>
-              </div>
-              <div class="ats-hint">
-                Nhà tuyển dụng ưu tiên CV chuẩn ATS. <a href="#">Hoàn thiện CV &gt;</a>
+    <div class="modal-body-custom">
+      <h3 class="section-title">Thông tin cơ bản</h3>
+      <div class="form-grid">
+        <div class="form-group full-width">
+          <label>Họ và tên <span class="required">*</span></label>
+          <input type="text" [(ngModel)]="applyForm.fullName" placeholder="Họ và tên" class="form-control">
+        </div>
+        <div class="form-group half-width">
+          <label>Số điện thoại <span class="required">*</span></label>
+          <input type="text" [(ngModel)]="applyForm.phone" placeholder="Số điện thoại" class="form-control">
+        </div>
+        <div class="form-group half-width">
+          <label>Email <span class="required">*</span></label>
+          <input type="email" [(ngModel)]="applyForm.email" placeholder="Email" class="form-control">
+        </div>
+      </div>
+
+      <h3 class="section-title">Chọn CV của bạn:</h3>
+      <div class="cv-section-container">
+        <div class="cv-list-custom" *ngIf="userCvs.length > 0">
+          <div class="cv-item-box" *ngFor="let cv of userCvs" [class.selected]="selectedCvId === cv.id">
+            <div class="cv-item-main">
+              <label class="radio-label">
+                <input type="radio" name="selectedCv" [value]="cv.id" [(ngModel)]="selectedCvId" (change)="selectCv(cv)">
+                <span class="cv-name">{{ cv.fileName || 'CV của tôi' }}</span>
+              </label>
+              <div class="cv-meta">
+                <span class="cv-date">{{ cv.uploadDate | date:'HH:mm dd/MM/yyyy' }}</span>
               </div>
             </div>
           </div>
-
-          <div class="no-cv-custom" *ngIf="userCvs.length === 0">
-            <p>Bạn chưa có bản CV nào trên hệ thống.</p>
-          </div>
-          
-          <div class="upload-new-container">
-            <button class="btn-upload-cv">
-              <i class="fas fa-file-upload"></i> Tải lên CV mới
-            </button>
-            <span class="upload-hint">Hỗ trợ *.doc, *.docx, *.pdf và < 5MB</span>
-          </div>
         </div>
-
-        <!-- Cover Letter -->
-        <h3 class="section-title">Thư giới thiệu</h3>
-        <div class="cover-letter-editor">
-          <div class="editor-toolbar">
-            <button><i class="fas fa-bold"></i></button>
-            <button><i class="fas fa-italic"></i></button>
-            <button><i class="fas fa-underline"></i></button>
-            <button><i class="fas fa-list-ul"></i></button>
-            <button><i class="fas fa-list-ol"></i></button>
-          </div>
-          <textarea 
-            [(ngModel)]="applyMessage" 
-            (ngModelChange)="updateWordCount()"
-            placeholder="Nhập lời giới thiệu bản thân hoặc liên kết portfolio"></textarea>
-          <div class="word-count-bar">
-            <span>{{ wordCount }} từ</span>
-          </div>
+        <div class="no-cv-custom" *ngIf="userCvs.length === 0">
+          <p>Bạn chưa có bản CV nào trên hệ thống.</p>
+        </div>
+        <div class="upload-new-container">
+          <button class="btn-upload-cv">
+            <i class="bi bi-cloud-upload"></i> Tải lên CV mới
+          </button>
+          <span class="upload-hint">Hỗ trợ *.doc, *.docx, *.pdf và &lt; 5MB</span>
         </div>
       </div>
 
-      <div class="modal-footer-custom">
-        <button class="btn-cancel-custom" (click)="closeModal()">Hủy</button>
-        <button class="btn-submit-custom" [disabled]="!selectedCvId" (click)="submitApplication()">Gửi CV</button>
+      <h3 class="section-title">Thư giới thiệu</h3>
+      <div class="cover-letter-editor">
+        <textarea
+          [(ngModel)]="applyMessage"
+          (ngModelChange)="updateWordCount()"
+          placeholder="Nhập lời giới thiệu bản thân hoặc liên kết portfolio"></textarea>
+        <div class="word-count-bar">
+          <span>{{ wordCount }} từ</span>
+        </div>
       </div>
+    </div>
+
+    <div class="modal-footer-custom">
+      <button class="btn-cancel-custom" (click)="closeModal()">Hủy</button>
+      <button class="btn-submit-custom" [disabled]="!selectedCvId" (click)="submitApplication()">Gửi CV</button>
     </div>
   </div>
 </div>

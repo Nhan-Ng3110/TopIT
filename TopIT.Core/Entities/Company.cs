@@ -28,6 +28,10 @@ namespace TopIT.Core.Entities
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        /// <summary>UserId của Employer quản lý công ty này</summary>
+        public int? EmployerUserId { get; set; }
+        public virtual User? EmployerUser { get; set; }
+
         public virtual ICollection<Job> Jobs { get; set; } = new List<Job>();// Danh sách tin đăng tuyển của công ty
     }
 }
