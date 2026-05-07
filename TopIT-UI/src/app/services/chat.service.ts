@@ -84,4 +84,11 @@ export class ChatService {
     const params = jobId ? `?jobId=${jobId}` : '';
     return this.http.get<ChatMessageDto[]>(`${this.API}/messages/${partnerId}${params}`);
   }
+
+  /** Lấy EmployerUserId từ CompanyId (dùng khi job.company.employerUserId chưa được set) */
+  getEmployerUserId(companyId: number): Observable<{ employerUserId: number | null }> {
+    return this.http.get<{ employerUserId: number | null }>(
+      `https://localhost:7151/api/companies/${companyId}/employer-user`
+    );
+  }
 }

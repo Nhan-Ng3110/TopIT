@@ -124,8 +124,46 @@ namespace TopIT.API.Controllers
             company.Website = updateDto.Website;
             company.Size = updateDto.Size;
 
+            // Tự động gán EmployerUserId để hệ thống chat biết User nào quản lý công ty này
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userIdClaim) && int.TryParse(userIdClaim, out int userId))
+            {
+                company.EmployerUserId = userId;
+            }
+
             await _context.SaveChangesAsync();
             return Ok(new { message = "Cập nhật thông tin công ty thành công" });
+        }
+
+        /// <summary>
+        /// GET api/companies/{id}/employer-user
+        /// Public endpoint - trả về EmployerUserId của công ty để chat widget biết gửi tin nhắn đến ai
+        /// </summary>
+        [HttpGet("{id}/employer-user")]
+        public async Task<IActionResult> GetEmployerUserId(int id)
+        {
+            var company = await _context.Companies.FindAsync(id);
+            if (company == null) return NotFound();
+
+            if (company.EmployerUserId.HasValue)
+            {
+                return Ok(new { employerUserId = company.EmployerUserId });
+            }
+
+            // Fallback: Tìm user đầu tiên thuộc company này (ưu tiên Role Employer)
+            var employerUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.CompanyId == id && u.Role == "Employer")
+                ?? await _context.Users.FirstOrDefaultAsync(u => u.CompanyId == id);
+
+            if (employerUser != null)
+            {
+                // Tự động gán lại cho company để lần sau không phải query nữa
+                company.EmployerUserId = employerUser.Id;
+                await _context.SaveChangesAsync();
+                return Ok(new { employerUserId = employerUser.Id });
+            }
+
+            return Ok(new { employerUserId = (int?)null });
         }
     }
 }

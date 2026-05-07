@@ -114,8 +114,9 @@
 
           <!-- Chat Widget -->
           <app-chat-widget
-            [receiverId]="job.company?.employerUserId || job.companyId"
-            [partnerName]="job.company?.name || 'Nh\u00e0 tuy\u1ec3n d\u1ee5ng'"
+            [receiverId]="job.company?.employerUserId"
+            [companyId]="job.companyId"
+            [partnerName]="job.company?.name || 'Nhà tuyển dụng'"
             [jobId]="job.id">
           </app-chat-widget>
         </div>

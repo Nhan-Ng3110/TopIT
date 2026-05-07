@@ -1,13 +1,17 @@
-import { Component, OnInit, signal, inject, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewChecked, signal, inject, computed, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApplicationService } from '../../../services/application';
 import { NotificationService } from '../../../services/notification';
 import { FormsModule } from '@angular/forms';
 import { SafePipe } from '../../../shared/pipes/safe.pipe';
+import { ChatService, ChatMessageDto } from '../../../services/chat.service';
+import { AuthService } from '../../../services/auth';
+import { Subscription } from 'rxjs';
 
 interface CandidateApplication {
   id: number;
   jobId: number;
+  userId: number; // Thêm userId
   jobTitle: string;
   candidateName: string;
   message: string;
@@ -144,18 +148,35 @@ interface CandidateApplication {
         <button class="btn-close" (click)="closeChat()"></button>
       </div>
       
-      <div class="chat-body">
-        <div class="message received">
-          <p class="mb-0">Chào nhà tuyển dụng, em đã ứng tuyển vị trí này ạ.</p>
+      <div class="chat-body" #scrollContainer>
+        <div *ngIf="isLoadingChat()" class="text-center p-3">
+          <div class="spinner-border spinner-border-sm text-primary"></div>
         </div>
-        <div class="message sent">
-          <p class="mb-0">Chào bạn, mình đã nhận được CV. Bạn sắp xếp phỏng vấn nhé!</p>
+
+        <div *ngIf="!isLoadingChat() && messages().length === 0" class="text-center text-muted p-4">
+          <i class="bi bi-chat-dots fs-1 opacity-25"></i>
+          <p class="mt-2">Bắt đầu cuộc trò chuyện với ứng viên!</p>
+        </div>
+
+        <div *ngFor="let msg of messages()" class="message-wrapper" [class.sent]="msg.senderId == currentUserId()" [class.received]="msg.senderId != currentUserId()">
+          <div class="sender-name" *ngIf="msg.senderId != currentUserId()">
+            {{ selectedCandidate()?.candidateName }}
+          </div>
+          <div class="message">
+            <p class="mb-0">{{ msg.content }}</p>
+            <span class="small opacity-75" style="font-size: 10px; margin-top: 4px; display: block;" [class.text-end]="msg.senderId == currentUserId()">{{ msg.sentAt | date:'HH:mm' }}</span>
+          </div>
         </div>
       </div>
 
       <div class="chat-footer">
-        <input type="text" placeholder="Nhập tin nhắn..." class="form-control rounded-pill" />
-        <button class="btn btn-primary rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;"><i class="bi bi-send-fill"></i></button>
+        <input type="text" placeholder="Nhập tin nhắn..." class="form-control rounded-pill" 
+               [(ngModel)]="inputText" (keydown.enter)="sendMessage()" 
+               [disabled]="!isConnected()" />
+        <button class="btn btn-primary rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;"
+                (click)="sendMessage()" [disabled]="!inputText.trim() || !isConnected()">
+          <i class="bi bi-send-fill"></i>
+        </button>
       </div>
     </div>
 
@@ -200,21 +221,38 @@ interface CandidateApplication {
     .chat-offcanvas.open { right: 0; }
     .chat-offcanvas .chat-header { padding: 16px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
     .chat-offcanvas .chat-body { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; background: #f8f9fa; }
-    .chat-offcanvas .message { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 14px; }
-    .chat-offcanvas .message.received { align-self: flex-start; background: #fff; border: 1px solid #e9ecef; border-bottom-left-radius: 2px; }
-    .chat-offcanvas .message.sent { align-self: flex-end; background: #0d6efd; color: white; border-bottom-right-radius: 2px; }
+    .chat-offcanvas .message-wrapper { display: flex; flex-direction: column; max-width: 85%; }
+    .chat-offcanvas .message-wrapper.received { align-self: flex-start; }
+    .chat-offcanvas .message-wrapper.sent { align-self: flex-end; }
+    .chat-offcanvas .sender-name { font-size: 11px; font-weight: 600; color: #6c757d; margin-bottom: 4px; padding-left: 4px; }
+    .chat-offcanvas .message { padding: 10px 14px; border-radius: 12px; font-size: 14px; }
+    .chat-offcanvas .message-wrapper.received .message { background: #fff; border: 1px solid #e9ecef; border-bottom-left-radius: 2px; }
+    .chat-offcanvas .message-wrapper.sent .message { background: #0d6efd; color: white; border-bottom-right-radius: 2px; }
     .chat-offcanvas .chat-footer { padding: 16px; border-top: 1px solid #eee; display: flex; gap: 10px; background: #fff; }
     .chat-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); z-index: 1040; }
   `]
 })
-export class EmployerCandidatesComponent implements OnInit {
+export class EmployerCandidatesComponent implements OnInit, OnDestroy, AfterViewChecked {
   private applicationService = inject(ApplicationService);
   private notification = inject(NotificationService);
+  private chatService = inject(ChatService);
+  private authService = inject(AuthService);
 
   candidates = signal<CandidateApplication[]>([]);
   currentFilter = signal<string>('All');
   selectedCandidate = signal<CandidateApplication | null>(null);
+  
+  // Chat state
   isChatOpen = signal<boolean>(false);
+  isLoadingChat = signal<boolean>(false);
+  isConnected = signal<boolean>(false);
+  messages = signal<ChatMessageDto[]>([]);
+  currentUserId = signal<number>(0);
+  inputText = '';
+  
+  @ViewChild('scrollContainer') private scrollEl!: ElementRef;
+  private chatSub?: Subscription;
+  private shouldScroll = false;
 
   filteredCandidates = computed(() => {
     const list = this.candidates();
@@ -225,6 +263,49 @@ export class EmployerCandidatesComponent implements OnInit {
 
   ngOnInit() {
     this.loadCandidates();
+
+    // Khởi tạo Chat
+    const uid = this.authService.getUserIdFromToken();
+    if (uid) this.currentUserId.set(+uid);
+
+    const token = localStorage.getItem('topit_token');
+    if (token) {
+      this.chatService.startConnection(token);
+    }
+
+    this.chatService.isConnected.subscribe(v => this.isConnected.set(v));
+
+    this.chatSub = this.chatService.messages$.subscribe(msg => {
+      const selected = this.selectedCandidate();
+      if (selected && this.isChatOpen()) {
+        // Nếu tin nhắn thuộc về cuộc hội thoại đang mở
+        if (
+          (msg.senderId == selected.userId && msg.receiverId == this.currentUserId()) ||
+          (msg.senderId == this.currentUserId() && msg.receiverId == selected.userId)
+        ) {
+          this.messages.update(list => [...list, msg]);
+          this.shouldScroll = true;
+        }
+      }
+    });
+  }
+
+  ngAfterViewChecked() {
+    if (this.shouldScroll) {
+      this.scrollToBottom();
+      this.shouldScroll = false;
+    }
+  }
+
+  ngOnDestroy() {
+    this.chatSub?.unsubscribe();
+  }
+
+  private scrollToBottom() {
+    try {
+      const el = this.scrollEl?.nativeElement;
+      if (el) el.scrollTop = el.scrollHeight;
+    } catch {}
   }
 
   loadCandidates() {
@@ -291,9 +372,33 @@ export class EmployerCandidatesComponent implements OnInit {
 
   openChat(candidate: CandidateApplication) {
     this.isChatOpen.set(true);
+    this.loadChatHistory(candidate);
   }
 
   closeChat() {
     this.isChatOpen.set(false);
+  }
+
+  loadChatHistory(candidate: CandidateApplication) {
+    if (!candidate.userId) return;
+    this.isLoadingChat.set(true);
+    this.chatService.getMessages(candidate.userId, candidate.jobId).subscribe({
+      next: msgs => {
+        this.messages.set(msgs);
+        this.isLoadingChat.set(false);
+        this.shouldScroll = true;
+      },
+      error: () => this.isLoadingChat.set(false)
+    });
+  }
+
+  sendMessage() {
+    const text = this.inputText.trim();
+    const selected = this.selectedCandidate();
+    
+    if (!text || !selected || !selected.userId) return;
+    
+    this.chatService.sendMessage(selected.userId, text, selected.jobId);
+    this.inputText = '';
   }
 }

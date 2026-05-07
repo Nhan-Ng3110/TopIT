@@ -1,0 +1,147 @@
+<!-- Nút mở chat -->
+<button class="btn-open-chat" (click)="toggleChat()" *ngIf="!isOpen()">
+  <i class="bi bi-chat-dots-fill"></i>
+  <span>Chat với {{ partnerName }}</span>
+  <span class="unread-dot" *ngIf="unreadCount() > 0">{{ unreadCount() }}</span>
+</button>
+
+<!-- Khung chat Offcanvas -->
+<div class="chat-panel" [class.open]="isOpen()">
+  <!-- Header -->
+  <div class="chat-header">
+    <div class="header-left">
+      <div class="partner-avatar">
+        {{ partnerInitial() }}
+        <span class="status-dot" [class.online]="isConnected()"></span>
+      </div>
+      <div class="partner-info">
+        <div class="partner-name">{{ partnerName }}</div>
+        <div class="partner-company" *ngIf="companyName">{{ companyName }}</div>
+        <div class="partner-status">
+          {{ isConnected() ? 'Đang hoạt động' : 'Đang kết nối...' }}
+        </div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <a *ngIf="jobId" [routerLink]="['/jobs', jobId]" class="btn-view-job" title="Xem chi tiết Job">
+        <i class="bi bi-box-arrow-up-right"></i>
+      </a>
+      <button class="btn-close-chat" (click)="toggleChat()" title="Đóng chat">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Lịch sử tin nhắn -->
+  <div class="chat-body" #scrollContainer>
+    <div *ngIf="isLoading()" class="loading-state">
+      <div class="spinner-border spinner-border-sm text-primary"></div>
+    </div>
+
+    <div *ngIf="!isLoading() && messages().length === 0 && isReceiverValid" class="empty-state">
+      <div class="empty-icon"><i class="bi bi-chat-square-heart"></i></div>
+      <p class="empty-title">Chưa có tin nhắn nào</p>
+      <p class="empty-desc">Hãy bắt đầu cuộc trò chuyện với nhà tuyển dụng ngay bây giờ!</p>
+    </div>
+
+    <div *ngIf="!isLoading() && !isReceiverValid" class="empty-state error-state">
+      <div class="empty-icon"><i class="bi bi-person-x text-danger"></i></div>
+      <p class="empty-title text-danger">Không thể gửi tin nhắn</p>
+      <p class="empty-desc">Nhà tuyển dụng chưa cập nhật thông tin liên hệ.</p>
+    </div>
+
+    <!-- Vòng lặp tin nhắn -->
+    <ng-container *ngFor="let msg of messages(); let i = index">
+      
+      <!-- Time divider (Optional logic for future) -->
+      <div class="time-divider" *ngIf="showTimeDivider(i)">
+        <span>{{ msg.sentAt | date:'HH:mm dd/MM/yyyy' }}</span>
+      </div>
+
+      <div class="message-wrapper"
+           [class.mine]="msg.senderId == currentUserId()"
+           [class.consecutive]="isConsecutive(i)">
+        
+        <!-- Avatar for partner messages -->
+        <div class="msg-avatar" *ngIf="msg.senderId != currentUserId() && !isConsecutive(i)">
+          {{ partnerInitial() }}
+        </div>
+        <div class="msg-avatar-placeholder" *ngIf="msg.senderId != currentUserId() && isConsecutive(i)"></div>
+
+        <div class="msg-content-area">
+          <div class="sender-name" *ngIf="msg.senderId != currentUserId() && !isConsecutive(i)">
+            {{ partnerName }}
+          </div>
+          
+          <div class="bubble-row">
+            <div class="bubble" [title]="msg.sentAt | date:'HH:mm dd/MM/yyyy'">
+              <p class="mb-0">{{ msg.content }}</p>
+            </div>
+          </div>
+
+          <div class="msg-meta" *ngIf="msg.senderId == currentUserId() && isLastInGroup(i)">
+            <span class="msg-time">{{ msg.sentAt | date:'HH:mm' }}</span>
+            <!-- Mock Read Receipt -->
+            <i class="bi bi-check2-all read-receipt" [class.read]="msg.isRead"></i>
+          </div>
+          <div class="msg-meta" *ngIf="msg.senderId != currentUserId() && isLastInGroup(i)">
+            <span class="msg-time">{{ msg.sentAt | date:'HH:mm' }}</span>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Typing Indicator Mock -->
+    <div class="message-wrapper" *ngIf="isPartnerTyping">
+      <div class="msg-avatar">{{ partnerInitial() }}</div>
+      <div class="msg-content-area">
+        <div class="bubble typing-bubble">
+          <div class="typing-indicator">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Replies -->
+  <div class="quick-replies" *ngIf="messages().length < 5 && isReceiverValid">
+    <button class="quick-reply-chip" *ngFor="let reply of quickReplies" (click)="sendQuickReply(reply)">
+      {{ reply }}
+    </button>
+  </div>
+
+  <!-- Input Area -->
+  <div class="chat-footer">
+    <div class="input-actions-left">
+      <button class="btn-icon" title="Đính kèm CV/Tài liệu (MOCK)">
+        <i class="bi bi-paperclip"></i>
+      </button>
+    </div>
+    
+    <div class="input-wrapper">
+      <textarea
+        #msgInput
+        class="msg-textarea"
+        [(ngModel)]="inputText"
+        placeholder="Nhập tin nhắn..."
+        (keydown.enter)="onEnter($event)"
+        (input)="adjustTextareaHeight(msgInput)"
+        rows="1"
+        [disabled]="!isConnected() || !isReceiverValid"
+      ></textarea>
+      <button class="btn-icon btn-emoji" title="Chọn Emoji (MOCK)">
+        <i class="bi bi-emoji-smile"></i>
+      </button>
+    </div>
+
+    <div class="input-actions-right">
+      <button class="btn-send-primary" (click)="send()" [disabled]="!inputText.trim() || !isConnected() || !isReceiverValid">
+        <i class="bi bi-send-fill"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Backdrop -->
+<div class="chat-backdrop" *ngIf="isOpen()" (click)="toggleChat()"></div>
